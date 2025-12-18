@@ -83,8 +83,6 @@ const HUMAN_MAX = HUMAN_MIN + (TOTAL_PAGES - IMAGE_FIRST_FOR_HUMAN_MIN);
       // [2, "Edition page"],
     ]);
 
-    SMB.PageMap = PageMap;
-
     const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
     const isInt = (n) => Number.isInteger(n);
 
@@ -140,7 +138,7 @@ const HUMAN_MAX = HUMAN_MIN + (TOTAL_PAGES - IMAGE_FIRST_FOR_HUMAN_MIN);
       humanLabel,
     };
   })();
-
+  SMB.PageMap = PageMap;
   // ---- State ----
   let soundOn = (localStorage.getItem("flip:sound") ?? "1") === "1";
   let zoom = Number(localStorage.getItem("flip:zoom") || "1");
