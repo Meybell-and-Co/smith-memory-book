@@ -62,18 +62,17 @@
      * HUMAN pages: what the user sees (page indicator, search results, TOC)
      * IMAGE numbers: your actual files (lembo_0001.webp, etc)
      */
+    
+// Example: if you want "Cover" to be Human page 1, set HUMAN_MIN = 1.
+const HUMAN_MIN = 1;
 
-    // Example: if you want "Cover" to be Human page 1, set HUMAN_MIN = 1.
-    const HUMAN_MIN = 1;
+// The image number (as in filename number) that corresponds to HUMAN_MIN.
+// Human page 1 = lembo_0002.webp => 2
+const IMAGE_FIRST_FOR_HUMAN_MIN = 2;
 
-    // Highest human page you want users to navigate to.
-    // Tie it to TOTAL_PAGES so you don't duplicate numbers.
-    const HUMAN_MAX = HUMAN_MIN + (TOTAL_PAGES - IMAGE_FIRST_FOR_HUMAN_MIN);
-
-    // The image number (as in filename number) that corresponds to HUMAN_MIN.
-    // If Human page 1 = lembo_0001.webp, set IMAGE_FIRST_FOR_HUMAN_MIN = 1.
-    // If Human page 1 = lembo_0002.webp, set IMAGE_FIRST_FOR_HUMAN_MIN = 2, etc.
-    const IMAGE_FIRST_FOR_HUMAN_MIN = 2;
+// Highest human page you want users to navigate to.
+// Tied to TOTAL_PAGES so you don’t duplicate numbers.
+const HUMAN_MAX = HUMAN_MIN + (TOTAL_PAGES - IMAGE_FIRST_FOR_HUMAN_MIN);
 
     // St.PageFlip uses 0-based indexes for flip(n) in your current code (you do "- 1"),
     // so keep this true.
