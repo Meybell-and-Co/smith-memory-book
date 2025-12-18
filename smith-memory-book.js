@@ -1,5 +1,6 @@
 console.log("✅ inline flipbook script loaded");
 console.log("✅ main script started");
+console.log("🔥 SMB SNAPSHOT: for-chad-gpt set");
 
 (function () {
     const BASE = "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/pages/";
