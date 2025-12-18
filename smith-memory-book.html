@@ -161,15 +161,43 @@
       }
 
       function doPrintCurrent() {
-        const page = Number(localStorage.getItem("flip:page") || "1");
-        const img = pageUrl(page);
-        const w = window.open("", "_blank");
-        if (!w) return;
+  const page = Number(localStorage.getItem("flip:page") || "1");
+  const imgSrc = pageUrl(page);
 
-        w.document.open();
-        w.document.write('<!DOCTYPE html><html><head><title>Print page ' + page + '</title><style>body{margin:0;display:flex;justify-content:center;align-items:center}img{max-width:100vw;max-height:100vh}</style></head><body><img src="' + img + '"><script>const i=document.querySelector("img");i.onload=function(){window.focus();window.print();setTimeout(function(){window.close()},250);};<\/script></body></html>');
-        w.document.close();
-      }
+  const w = window.open("", "_blank");
+  if (!w) return;
+
+  // Build popup HTML without any <script> tags inside strings
+  w.document.open();
+  w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8">');
+  w.document.write("<title>Print page " + page + "</title>");
+  w.document.write(
+    "<style>" +
+      "body{margin:0;display:flex;justify-content:center;align-items:center;}" +
+      "img{max-width:100vw;max-height:100vh;}" +
+    "</style>"
+  );
+  w.document.write("</head><body>");
+  w.document.write('<img id="printImg" src="' + imgSrc + '" alt="Page ' + page + '">');
+  w.document.write("</body></html>");
+  w.document.close();
+
+  // Now wire printing logic safely (no HTML parser edge cases)
+  w.onload = () => {
+    const img = w.document.getElementById("printImg");
+    if (!img) return;
+
+    img.onload = () => {
+      w.focus();
+      w.print();
+      setTimeout(() => w.close(), 250);
+    };
+
+    // If cached and already complete, trigger manually
+    if (img.complete) img.onload();
+  };
+}
+
 
       let tilesBuilt = false;
       function buildTilesOnce() {
