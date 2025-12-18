@@ -5,17 +5,15 @@
   <meta charset="UTF-8" />
   <title>Smith Memory Book – Flipbook</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://unpkg.com/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
-  <script
-  src="https://unpkg.com/page-flip@2.0.7/dist/js/page-flip.browser.js"
-  onload="console.log('✅ PageFlip loaded')"
-  onerror="console.error('❌ PageFlip failed to load')"
-></script>
+
+  <script src="https://unpkg.com/page-flip@2.0.7/dist/js/page-flip.browser.js" onload="console.log('✅ PageFlip loaded')"
+    onerror="console.error('❌ PageFlip failed to load')"></script>
+
   <link rel="stylesheet" href="smith-memory-book.css" />
+  <script defer src="smith-memory-book.js"></script>
 </head>
 
 <body>
-
   <div id="flipbook-stage">
     <div id="flipbook-wrap">
       <div id="flipbook"></div>
@@ -31,51 +29,58 @@
 
     <div class="flipbar" id="flipbar">
       <button id="btnFirst" class="ibtn" title="First" type="button">
-        <img data-ikey="start" alt="First">
+        <img data-ikey="start" alt="First" />
       </button>
 
-      <button id="btnPrev" class="ibtn" title="Previous" type="button">‹</button>
+      <button id="btnPrev" class="ibtn" title="Previous" type="button">
+        <img data-ikey="prev" alt="Previous" />
+      </button>
 
       <input id="pageJump" class="pageJump" inputmode="numeric" pattern="[0-9]*" placeholder="pg" />
 
-      <button id="btnNext" class="ibtn" title="Next" type="button">›</button>
+      <button id="btnNext" class="ibtn" title="Next" type="button">
+        <img data-ikey="next" alt="Next" />
+      </button>
 
       <button id="btnLast" class="ibtn" title="Last" type="button">
-        <img data-ikey="end" alt="Last">
+        <img data-ikey="end" alt="Last" />
       </button>
 
       <div class="sep"></div>
 
       <button id="zoomOut" class="ibtn" title="Zoom out" type="button">
-        <img data-ikey="zoomOut" alt="Zoom out">
+        <img data-ikey="zoomOut" alt="Zoom out" />
       </button>
 
       <button id="zoomIn" class="ibtn" title="Zoom in" type="button">
-        <img data-ikey="zoomIn" alt="Zoom in">
+        <img data-ikey="zoomIn" alt="Zoom in" />
       </button>
 
       <div class="sep"></div>
 
       <button id="btnTiles" class="ibtn" title="Tiles" type="button">
-        <img data-ikey="tiles" alt="Tiles">
+        <img data-ikey="tiles" alt="Tiles" />
       </button>
 
       <button id="btnSound" class="ibtn" title="Sound" type="button">
-        <img data-ikey="sound" alt="Sound">
+        <img data-ikey="sound" alt="Sound" />
       </button>
 
       <button id="btnMore" class="ibtn" title="More" type="button">
-        <img data-ikey="more" alt="More">
+        <img data-ikey="more" alt="More" />
       </button>
 
       <div id="moreMenu" class="moremenu">
-        <button id="btnShare" type="button"><img data-ikey="share" alt="">Share</button>
-        <button id="btnPrint" type="button"><img data-ikey="print" alt="">Print</button>
-        <button id="btnFull" type="button"><img data-ikey="fullscreen" alt="">Full screen</button>
-        <button id="btnSearch" type="button"><img data-ikey="search" alt="">Search</button>
+        <button id="btnShare" type="button"><img data-ikey="share" alt="" />Share</button>
+        <button id="btnStage" type="button"><img data-ikey="pan" alt="" />Stage</button>
+        <button id="btnPrint" type="button"><img data-ikey="print" alt="" />Print</button>
+        <button id="btnFull" type="button"><img data-ikey="fullscreen" alt="" />Full screen</button>
+        <button id="btnSearch" type="button"><img data-ikey="search" alt="" />Search</button>
+
+        <div id="stageMenu" class="stagemenu"></div>
       </div>
     </div>
   </div>
-  <script defer src="smith-memory-book.js"></script>
 </body>
+
 </html>
