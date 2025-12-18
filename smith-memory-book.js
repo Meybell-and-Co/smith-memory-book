@@ -425,6 +425,6 @@ $("btnNext")  && ($("btnNext").onclick  = () => window.__flipbook?.pageFlip?.fli
     const t = setInterval(() => {
         tries++;
         const ok = init();
-        if (ok || tries > 400) clearInterval(t);
+        if (ok || tries > 20) clearInterval(t);
     }, 50);
 })();
