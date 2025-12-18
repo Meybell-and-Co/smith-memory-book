@@ -82,6 +82,8 @@
       // [2, "Edition page"],
     ]);
 
+    SMB.PageMap = PageMap;
+
     const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
     const isInt = (n) => Number.isInteger(n);
 
