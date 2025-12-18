@@ -58,10 +58,8 @@
     // Human pages: what user types/sees (your "pg" box)
     const HUMAN_MIN = 1;
 
-    // 🔥 SET THIS:
-    // 1 => Human 1 == lembo_0001.webp (cover)
-    // 2 => Human 1 == lembo_0002.webp (skip cover in human numbering)
     const IMAGE_FIRST_FOR_HUMAN_MIN = 1;
+    const PAGE_FIRST_FOR_HUMAN_VIEW = IMAGE_FIRST_FOR_HUMAN_MIN;
 
     // Derived max human page based on images available
     const HUMAN_MAX = HUMAN_MIN + (TOTAL_IMAGES - IMAGE_FIRST_FOR_HUMAN_MIN);
