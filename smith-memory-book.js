@@ -49,6 +49,112 @@
     return a;
   }
 
+// ===============================
+// Page Mapping: Human ↔ Image
+// One source of truth for navigation
+// ===============================
+
+const PageMap = (() => {
+  /**
+   * CONFIG — edit these once, then forget about offsets everywhere else.
+   *
+   * HUMAN pages: what the user sees (page indicator, search results, TOC)
+   * IMAGE numbers: your actual files (lembo_0001.webp, etc)
+   */
+
+  // Example: if you want "Cover" to be Human page 1, set HUMAN_MIN = 1.
+  const HUMAN_MIN = 1;
+
+  // Set this to the highest Human page you want users to navigate to.
+  // Often equals TOTAL_IMAGES if you include cover/back, but not always.
+  const HUMAN_MAX = 239;
+
+  // The image number (as in filename number) that corresponds to HUMAN_MIN.
+  // If Human page 1 = lembo_0001.webp, set IMAGE_FIRST_FOR_HUMAN_MIN = 1.
+  // If Human page 1 = lembo_0002.webp, set IMAGE_FIRST_FOR_HUMAN_MIN = 2, etc.
+  const IMAGE_FIRST_FOR_HUMAN_MIN = 1;
+
+  // If your flipbook library wants a 0-based index (common), keep this true.
+  // If it wants 1-based, set to false and use imageNumber directly.
+  const FLIP_USES_ZERO_BASED_INDEX = true;
+
+  // Optional: if you have "special" pages you want to label (no folio, etc.)
+  // Map human page -> label override.
+  // Example: 3 is your “Edition notice” page.
+  const HUMAN_LABEL_OVERRIDES = new Map([
+    // [3, "Edition page"], // uncomment / edit if desired
+  ]);
+
+  // ---------- helpers ----------
+  const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
+
+  const isInt = (n) => Number.isInteger(n);
+
+  const assertHuman = (humanPage) => {
+    if (!isInt(humanPage)) throw new Error(`Human page must be an integer. Got: ${humanPage}`);
+    if (humanPage < HUMAN_MIN || humanPage > HUMAN_MAX) {
+      throw new Error(`Human page out of range (${HUMAN_MIN}–${HUMAN_MAX}). Got: ${humanPage}`);
+    }
+  };
+
+  /**
+   * Human page -> imageNumber (as in filename number, e.g. 4 => lembo_0004.webp)
+   */
+  const humanToImageNumber = (humanPage) => {
+    assertHuman(humanPage);
+    const delta = humanPage - HUMAN_MIN;
+    return IMAGE_FIRST_FOR_HUMAN_MIN + delta;
+  };
+
+  /**
+   * imageNumber -> human page
+   */
+  const imageNumberToHuman = (imageNumber) => {
+    if (!isInt(imageNumber)) throw new Error(`Image number must be an integer. Got: ${imageNumber}`);
+    const human = HUMAN_MIN + (imageNumber - IMAGE_FIRST_FOR_HUMAN_MIN);
+    return clamp(human, HUMAN_MIN, HUMAN_MAX);
+  };
+
+  /**
+   * Human page -> flip index (what you pass into the flipbook)
+   */
+  const humanToFlipIndex = (humanPage) => {
+    const imageNumber = humanToImageNumber(humanPage);
+    return FLIP_USES_ZERO_BASED_INDEX ? (imageNumber - 1) : imageNumber;
+  };
+
+  /**
+   * flip index -> human page (for page indicator updates)
+   */
+  const flipIndexToHuman = (flipIndex) => {
+    if (!isInt(flipIndex)) throw new Error(`Flip index must be an integer. Got: ${flipIndex}`);
+    const imageNumber = FLIP_USES_ZERO_BASED_INDEX ? (flipIndex + 1) : flipIndex;
+    return imageNumberToHuman(imageNumber);
+  };
+
+  /**
+   * Nice label for UI
+   */
+  const humanLabel = (humanPage) => {
+    assertHuman(humanPage);
+    return HUMAN_LABEL_OVERRIDES.get(humanPage) ?? `Page ${humanPage}`;
+  };
+
+  return {
+    // config exposure (optional)
+    HUMAN_MIN, HUMAN_MAX, IMAGE_FIRST_FOR_HUMAN_MIN, FLIP_USES_ZERO_BASED_INDEX,
+
+    // core conversions
+    humanToImageNumber,
+    imageNumberToHuman,
+    humanToFlipIndex,
+    flipIndexToHuman,
+
+    // ui
+    humanLabel,
+  };
+})();
+  
   // ---- State ----
   let soundOn = (localStorage.getItem("flip:sound") ?? "1") === "1";
   let zoom = Number(localStorage.getItem("flip:zoom") || "1");
