@@ -160,46 +160,16 @@
           .catch(() => prompt("Copy this link:", link));
       }
 
- function doPrintCurrent() {
-  const page = Number(localStorage.getItem("flip:page") || "1");
-  const img = pageUrl(page);
-  const w = window.open("", "_blank");
-  if (!w) return;
+      function doPrintCurrent() {
+        const page = Number(localStorage.getItem("flip:page") || "1");
+        const img = pageUrl(page);
+        const w = window.open("", "_blank");
+        if (!w) return;
 
-  w.document.write(`
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <title>Print page ${page}</title>
-        <style>
-          body {
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-          }
-          img {
-            max-width: 100vw;
-            max-height: 100vh;
-          }
-        </style>
-      </head>
-      <body>
-        <img src="${img}">
-        <script>
-          const i = document.querySelector("img");
-          i.onload = () => {
-            window.focus();
-            window.print();
-            setTimeout(() => window.close(), 250);
-          };
-        <\/script>
-      </body>
-    </html>
-  `);
-
-  w.document.close();
-}
+        w.document.open();
+        w.document.write('<!DOCTYPE html><html><head><title>Print page ' + page + '</title><style>body{margin:0;display:flex;justify-content:center;align-items:center}img{max-width:100vw;max-height:100vh}</style></head><body><img src="' + img + '"><script>const i=document.querySelector("img");i.onload=function(){window.focus();window.print();setTimeout(function(){window.close()},250);};<\/script></body></html>');
+        w.document.close();
+      }
 
       let tilesBuilt = false;
       function buildTilesOnce() {
