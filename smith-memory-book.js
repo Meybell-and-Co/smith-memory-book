@@ -1,5 +1,7 @@
-console.log("✅ inline flipbook script loaded");
-console.log("✅ main script started");
+(function () {
+  console.log("✅ main script started");
+  // ...
+})();
 
 (function () {
     const BASE = "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/pages/";
@@ -259,10 +261,11 @@ console.log("✅ main script started");
             });
         }
 
-        $("btnFirst") && ($("btnFirst").onclick = () => window.__flipbook.pageFlip.flip(0));
-        $("btnLast") && ($("btnLast").onclick = () => window.__flipbook.pageFlip.flip(TOTAL_PAGES - 1));
-        $("btnPrev") && ($("btnPrev").onclick = () => window.__flipbook.pageFlip.flipPrev());
-        $("btnNext") && ($("btnNext").onclick = () => window.__flipbook.pageFlip.flipNext());
+$("btnFirst") && ($("btnFirst").onclick = () => window.__flipbook?.pageFlip?.flip(0));
+$("btnLast")  && ($("btnLast").onclick  = () => window.__flipbook?.pageFlip?.flip(TOTAL_PAGES - 1));
+$("btnPrev")  && ($("btnPrev").onclick  = () => window.__flipbook?.pageFlip?.flipPrev());
+$("btnNext")  && ($("btnNext").onclick  = () => window.__flipbook?.pageFlip?.flipNext());
+
 
         const pageJump = $("pageJump");
         pageJump?.addEventListener("keydown", (e) => {
@@ -379,11 +382,11 @@ console.log("✅ main script started");
     function init() {
         const el = $("flipbook");
         if (!el) return false;
-        if (!window.St?.PageFlip) return false;
+        if (!window.St || typeof window.St.PageFlip !== "function") return false;
         if (el.dataset.flipInit === "1") return true;
         el.dataset.flipInit = "1";
 
-        const pageFlip = new window.St.PageFlip(el, {
+        const pageFlip = new St.PageFlip(el, {
             width: 2000,
             height: 1680,
             size: "stretch",
