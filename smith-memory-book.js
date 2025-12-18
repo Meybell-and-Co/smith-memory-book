@@ -1,15 +1,14 @@
 (function () {
   console.log("✅ main script started");
-  console.log("🔥 SMB MAIN JS v2025-12-18 11:58");
+  console.log("🔥 SMB MAIN JS v2025-12-18 12:xx — clean + safe wiring");
 
   // ---- App namespace (ONE global, intentionally) ----
   window.SMB = window.SMB || {};
   const SMB = window.SMB;
-  console.log("SMB exists?", !!window.SMB);
 
   // ---- Config ----
   const BASE = "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/pages/";
-  const TOTAL_PAGES = 239;
+  const TOTAL_IMAGES = 239;
 
   const ROOT = "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/";
   const ICON_BASE = ROOT + "flipbook-ui-icons/";
@@ -33,15 +32,6 @@
     pan: ICON_BASE + "pan-gold.png",
   };
 
-  const STAGES = [
-    ["table", "Table"],
-    ["parquet", "Parquet"],
-    ["kitchen", "Counter"],
-    ["basement", "Basement"],
-    ["lawn", "Lawn"],
-    ["cancun", "Poolside"],
-  ];
-
   const $ = (id) => document.getElementById(id);
 
   function makeAudio(url, vol = 0.6) {
@@ -52,42 +42,15 @@
   }
 
   // ===============================
-  // Page Mapping: Human ↔ Image
-  // One source of truth for navigation
+  // Page Mapping: Human ↔ Image (skip Edition page)
   // ===============================
   const PageMap = (() => {
-    /**
-     * CONFIG — edit these once, then forget about offsets everywhere else.
-     *
-     * HUMAN pages: what the user sees (page indicator, search results, TOC)
-     * IMAGE numbers: your actual files (lembo_0001.webp, etc)
-     */
-
-    // Example: if you want "Cover" to be Human page 1, set HUMAN_MIN = 1.
     const HUMAN_MIN = 1;
+    const SKIP_IMAGE_NUMBERS = new Set([3]); // lembo_0003.webp is Edition page
+    const HUMAN_MAX = TOTAL_IMAGES - SKIP_IMAGE_NUMBERS.size;
 
-    // Highest human page you want users to navigate to.
-    // Tie it to TOTAL_PAGES so you don't duplicate numbers.
-    const HUMAN_MAX = HUMAN_MIN + (TOTAL_PAGES - IMAGE_FIRST_FOR_HUMAN_MIN);
-
-    // The image number (as in filename number) that corresponds to HUMAN_MIN.
-    // If Human page 1 = lembo_0001.webp, set IMAGE_FIRST_FOR_HUMAN_MIN = 1.
-    // If Human page 1 = lembo_0002.webp, set IMAGE_FIRST_FOR_HUMAN_MIN = 2, etc.
-    const IMAGE_FIRST_FOR_HUMAN_MIN = 2;
-
-    // St.PageFlip uses 0-based indexes for flip(n) in your current code (you do "- 1"),
-    // so keep this true.
-    const FLIP_USES_ZERO_BASED_INDEX = true;
-
-    // Optional: override labels for special pages (no folio, etc.)
-    const HUMAN_LABEL_OVERRIDES = new Map([
-      // [2, "Edition page"],
-    ]);
-
-    SMB.PageMap = PageMap;
-
-    const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
     const isInt = (n) => Number.isInteger(n);
+    const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
 
     const assertHuman = (humanPage) => {
       if (!isInt(humanPage)) throw new Error(`Human page must be an integer. Got: ${humanPage}`);
@@ -96,66 +59,40 @@
       }
     };
 
-    // Human page -> imageNumber (as in filename number)
     const humanToImageNumber = (humanPage) => {
       assertHuman(humanPage);
-      const delta = humanPage - HUMAN_MIN;
-      return IMAGE_FIRST_FOR_HUMAN_MIN + delta;
+      let img = 0;
+      let count = 0;
+      while (count < humanPage) {
+        img++;
+        if (!SKIP_IMAGE_NUMBERS.has(img)) count++;
+      }
+      return img;
     };
 
-    // imageNumber -> human page
     const imageNumberToHuman = (imageNumber) => {
       if (!isInt(imageNumber)) throw new Error(`Image number must be an integer. Got: ${imageNumber}`);
-      const human = HUMAN_MIN + (imageNumber - IMAGE_FIRST_FOR_HUMAN_MIN);
-      return clamp(human, HUMAN_MIN, HUMAN_MAX);
+      let count = 0;
+      for (let img = 1; img <= imageNumber; img++) {
+        if (!SKIP_IMAGE_NUMBERS.has(img)) count++;
+      }
+      return clamp(count, HUMAN_MIN, HUMAN_MAX);
     };
 
-    // Human page -> flip index (what you pass into PageFlip.flip)
-    const humanToFlipIndex = (humanPage) => {
-      const imageNumber = humanToImageNumber(humanPage);
-      return FLIP_USES_ZERO_BASED_INDEX ? imageNumber - 1 : imageNumber;
-    };
+    const humanToFlipIndex = (humanPage) => humanToImageNumber(humanPage) - 1;
+    const flipIndexToHuman = (flipIndex) => imageNumberToHuman(flipIndex + 1);
 
-    // flip index -> human page (for page indicator updates)
-    const flipIndexToHuman = (flipIndex) => {
-      if (!isInt(flipIndex)) throw new Error(`Flip index must be an integer. Got: ${flipIndex}`);
-      const imageNumber = FLIP_USES_ZERO_BASED_INDEX ? flipIndex + 1 : flipIndex;
-      return imageNumberToHuman(imageNumber);
-    };
-
-    const humanLabel = (humanPage) => {
-      assertHuman(humanPage);
-      return HUMAN_LABEL_OVERRIDES.get(humanPage) ?? `Page ${humanPage}`;
-    };
-
-    return {
-      HUMAN_MIN,
-      HUMAN_MAX,
-      IMAGE_FIRST_FOR_HUMAN_MIN,
-      FLIP_USES_ZERO_BASED_INDEX,
-
-      humanToImageNumber,
-      imageNumberToHuman,
-      humanToFlipIndex,
-      flipIndexToHuman,
-      humanLabel,
-    };
+    return { HUMAN_MIN, HUMAN_MAX, humanToImageNumber, imageNumberToHuman, humanToFlipIndex, flipIndexToHuman };
   })();
+
+  SMB.PageMap = PageMap;
 
   // ---- State ----
   let soundOn = (localStorage.getItem("flip:sound") ?? "1") === "1";
   let zoom = Number(localStorage.getItem("flip:zoom") || "1");
-
   let stageKey = localStorage.getItem("flip:stage") || "table";
-  const stageEl = $("flipbook-stage");
 
-  let panX = 0,
-    panY = 0,
-    isPanning = false,
-    panSX = 0,
-    panSY = 0,
-    panOX = 0,
-    panOY = 0;
+  const stageEl = $("flipbook-stage");
 
   const SFX = {
     hover: makeAudio(SOUND_BASE + "hover.mp3", 0.35),
@@ -172,14 +109,6 @@
     ],
   };
 
-  function playSfx(key) {
-    if (!soundOn) return;
-    const a = SFX[key];
-    if (!a) return;
-    a.currentTime = 0;
-    a.play().catch(() => {});
-  }
-
   function playRandomTurn() {
     if (!soundOn) return;
     const a = SFX.pageTurns[Math.floor(Math.random() * SFX.pageTurns.length)];
@@ -187,20 +116,14 @@
     a.play().catch(() => {});
   }
 
-  // Build a URL from an IMAGE number (filename number), not human page.
-  // That way the mapping controls the relationship.
+  // Build a URL from an IMAGE number (filename number)
   function pageUrlFromImageNumber(imageNumber) {
     const n = String(imageNumber).padStart(4, "0");
     return `${BASE}lembo_${n}.webp`;
   }
 
   function buildPages() {
-    // Build in HUMAN order, but convert via PageMap, so offsets live in one place.
-    return Array.from({ length: TOTAL_PAGES }, (_, i) => {
-      const human = i + 1;
-      const imageNumber = PageMap.humanToImageNumber(human);
-      return pageUrlFromImageNumber(imageNumber);
-    });
+    return Array.from({ length: TOTAL_IMAGES }, (_, i) => pageUrlFromImageNumber(i + 1));
   }
 
   function paintIcons() {
@@ -225,48 +148,48 @@
     stageEl.style.setProperty("--stage-img", stageVar);
   }
 
-  function applyTransform() {
-    const wrap = $("flipbook-wrap");
-    if (!wrap) return;
-    wrap.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+  function getPF() {
+    return SMB.flipbook?.pageFlip;
   }
 
-  function updatePanCursor() {
-    const wrap = $("flipbook-wrap");
-    if (!wrap) return;
-    wrap.classList.toggle("can-pan", zoom > 1);
-  }
-
-  function setZoom(z) {
-    zoom = Math.max(0.6, Math.min(2.2, z));
-    localStorage.setItem("flip:zoom", String(zoom));
-    applyTransform();
-    updatePanCursor();
-  }
-
+  let uiWired = false;
   function wireUI() {
+    if (uiWired) return;
+    uiWired = true;
+
     paintIcons();
     applyStage();
-    applyTransform();
-    updatePanCursor();
 
-    // First/Last/Prev/Next
-    $("btnFirst") && ($("btnFirst").onclick = () => SMB.flipbook?.pageFlip?.flip(PageMap.humanToFlipIndex(1)));
-    $("btnLast") &&
-      ($("btnLast").onclick = () => SMB.flipbook?.pageFlip?.flip(PageMap.humanToFlipIndex(TOTAL_PAGES)));
-    $("btnPrev") && ($("btnPrev").onclick = () => SMB.flipbook?.pageFlip?.flipPrev());
-    $("btnNext") && ($("btnNext").onclick = () => SMB.flipbook?.pageFlip?.flipNext());
+    // Buttons
+    const btnFirst = $("btnFirst");
+    const btnLast = $("btnLast");
+    const btnPrev = $("btnPrev");
+    const btnNext = $("btnNext");
 
-    // Page Jump (Human page in, mapping handles flip index)
+    btnFirst && (btnFirst.onclick = () => getPF()?.flip(PageMap.humanToFlipIndex(PageMap.HUMAN_MIN)));
+    btnLast && (btnLast.onclick = () => getPF()?.flip(PageMap.humanToFlipIndex(PageMap.HUMAN_MAX)));
+    btnPrev && (btnPrev.onclick = () => getPF()?.flipPrev());
+    btnNext && (btnNext.onclick = () => getPF()?.flipNext());
+
+    // Page jump
     const pageJump = $("pageJump");
     pageJump?.addEventListener("keydown", (e) => {
       if (e.key !== "Enter") return;
       const n = parseInt(e.currentTarget.value, 10);
       if (!Number.isFinite(n)) return;
 
-      const safeHuman = Math.max(1, Math.min(TOTAL_PAGES, n));
-      SMB.flipbook?.pageFlip?.flip(PageMap.humanToFlipIndex(safeHuman));
+      const safeHuman = Math.max(PageMap.HUMAN_MIN, Math.min(PageMap.HUMAN_MAX, n));
+      getPF()?.flip(PageMap.humanToFlipIndex(safeHuman));
     });
+
+    // quick sanity table
+    console.table(
+      [1, 2, 3, 4, 5].map((h) => ({
+        human: h,
+        image: PageMap.humanToImageNumber(h),
+        flipIndex: PageMap.humanToFlipIndex(h),
+      }))
+    );
   }
 
   function init() {
@@ -274,6 +197,7 @@
     if (!el) return false;
     if (!window.St || typeof window.St.PageFlip !== "function") return false;
     if (el.dataset.flipInit === "1") return true;
+
     el.dataset.flipInit = "1";
 
     const pageFlip = new St.PageFlip(el, {
@@ -294,13 +218,23 @@
 
     pageFlip.on("flip", () => playRandomTurn());
 
-    setTimeout(wireUI, 50);
+    // Now that PF exists, ensure UI is wired
+    wireUI();
+
     return true;
   }
 
+  // Wire UI once DOM exists (safe even before PF exists)
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", wireUI, { once: true });
+  } else {
+    wireUI();
+  }
+
+  // Retry init until St.PageFlip is ready
   let tries = 0;
   const t = setInterval(() => {
     tries++;
-    if (init() || tries > 20) clearInterval(t);
+    if (init() || tries > 40) clearInterval(t);
   }, 50);
 })();
