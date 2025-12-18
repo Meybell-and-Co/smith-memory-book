@@ -52,29 +52,21 @@
   }
 
   // ===============================
-  // Page Mapping: Human ↔ Image
+  // Page Mapping: Human ↔ Image (skip Edition page)
   // ===============================
   const PageMap = (() => {
-    // Human pages: what user types/sees (your "pg" box)
+    // Human pages: what user types/sees
     const HUMAN_MIN = 1;
 
-    const IMAGE_FIRST_FOR_HUMAN_MIN = 1;
-    const PAGE_FIRST_FOR_HUMAN_VIEW = IMAGE_FIRST_FOR_HUMAN_MIN;
+    // 👇 Image numbers that exist as files but should NOT count in human numbering
+    // Edition page = lembo_0003.webp
+    const SKIP_IMAGE_NUMBERS = new Set([3]);
 
-    // Derived max human page based on images available
-    const HUMAN_MAX = HUMAN_MIN + (TOTAL_IMAGES - IMAGE_FIRST_FOR_HUMAN_MIN);
-
-    // St.PageFlip flip(n) takes a 0-based "page index" in our wiring.
-    const FLIP_USES_ZERO_BASED_INDEX = true;
-
-    // Optional labels for special pages
-    const HUMAN_LABEL_OVERRIDES = new Map([
-      // [1, "Cover"],
-      // [2, "Edition page"],
-    ]);
-
-    const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
     const isInt = (n) => Number.isInteger(n);
+    const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
+
+    // How many images are “counted” as human pages?
+    const HUMAN_MAX = TOTAL_IMAGES - SKIP_IMAGE_NUMBERS.size;
 
     const assertHuman = (humanPage) => {
       if (!isInt(humanPage)) throw new Error(`Human page must be an integer. Got: ${humanPage}`);
@@ -83,47 +75,47 @@
       }
     };
 
-    // Human -> image filename number
+    // Human -> image filename number (skipping certain image numbers)
     const humanToImageNumber = (humanPage) => {
       assertHuman(humanPage);
-      return IMAGE_FIRST_FOR_HUMAN_MIN + (humanPage - HUMAN_MIN);
+
+      // Walk upward through image numbers, skipping any “non-human” pages
+      let img = 0;
+      let count = 0;
+      while (count < humanPage) {
+        img++;
+        if (!SKIP_IMAGE_NUMBERS.has(img)) count++;
+      }
+      return img;
     };
 
-    // Image filename number -> human
+    // Image filename number -> human (best effort; skips map to nearest valid human)
     const imageNumberToHuman = (imageNumber) => {
       if (!isInt(imageNumber)) throw new Error(`Image number must be an integer. Got: ${imageNumber}`);
-      const human = HUMAN_MIN + (imageNumber - IMAGE_FIRST_FOR_HUMAN_MIN);
-      return clamp(human, HUMAN_MIN, HUMAN_MAX);
+
+      let count = 0;
+      for (let img = 1; img <= imageNumber; img++) {
+        if (!SKIP_IMAGE_NUMBERS.has(img)) count++;
+      }
+      return clamp(count, HUMAN_MIN, HUMAN_MAX);
     };
 
-    // Human -> PageFlip flip index
-    const humanToFlipIndex = (humanPage) => {
-      const imageNumber = humanToImageNumber(humanPage);
-      return FLIP_USES_ZERO_BASED_INDEX ? imageNumber - 1 : imageNumber;
-    };
+    // PageFlip uses 0-based index for loaded images
+    const humanToFlipIndex = (humanPage) => humanToImageNumber(humanPage) - 1;
 
-    // PageFlip flip index -> human
     const flipIndexToHuman = (flipIndex) => {
       if (!isInt(flipIndex)) throw new Error(`Flip index must be an integer. Got: ${flipIndex}`);
-      const imageNumber = FLIP_USES_ZERO_BASED_INDEX ? flipIndex + 1 : flipIndex;
+      const imageNumber = flipIndex + 1;
       return imageNumberToHuman(imageNumber);
-    };
-
-    const humanLabel = (humanPage) => {
-      assertHuman(humanPage);
-      return HUMAN_LABEL_OVERRIDES.get(humanPage) ?? `Page ${humanPage}`;
     };
 
     return {
       HUMAN_MIN,
       HUMAN_MAX,
-      IMAGE_FIRST_FOR_HUMAN_MIN,
-      FLIP_USES_ZERO_BASED_INDEX,
       humanToImageNumber,
       imageNumberToHuman,
       humanToFlipIndex,
       flipIndexToHuman,
-      humanLabel,
     };
   })();
   SMB.PageMap = PageMap;
@@ -252,6 +244,12 @@
       SMB.flipbook?.pageFlip?.flip(PageMap.humanToFlipIndex(safeHuman));
     });
 
+      // Ensure icons/stage paint even if PageFlip init is delayed
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", wireUI, { once: true });
+  } else {
+    wireUI();
+  }
     // Optional: quick console sanity check
     console.table(
       [PageMap.HUMAN_MIN, 2, 3, 4, 5, PageMap.HUMAN_MAX].map((h) => ({
@@ -288,7 +286,6 @@
 
     pageFlip.on("flip", () => playRandomTurn());
 
-    setTimeout(wireUI, 50);
     return true;
   }
 
