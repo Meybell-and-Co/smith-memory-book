@@ -224,6 +224,12 @@ console.log("✅ main script started");
         tilesBuilt = true;
     }
 
+    function setPageIndicator(human) {
+        const el = $("pageIndicator");
+        if (!el) return;
+        const n = Math.max(1, Math.min(TOTAL_PAGES, Number(human) || 1));
+        el.textContent = `${n} / ${TOTAL_PAGES}`;
+    }
     function wireUI() {
         paintIcons();
         applyStage();
@@ -263,17 +269,6 @@ console.log("✅ main script started");
         $("btnLast") && ($("btnLast").onclick = () => window.__flipbook.pageFlip.flip(TOTAL_PAGES - 1));
         $("btnPrev") && ($("btnPrev").onclick = () => window.__flipbook.pageFlip.flipPrev());
         $("btnNext") && ($("btnNext").onclick = () => window.__flipbook.pageFlip.flipNext());
-
-        const pageJump = $("pageJump");
-        pageJump?.addEventListener("keydown", (e) => {
-            if (e.key !== "Enter") return;
-            const n = parseInt(e.currentTarget.value, 10);
-            if (Number.isFinite(n))
-                window.__flipbook.pageFlip.flip(
-                    Math.max(1, Math.min(TOTAL_PAGES, n)) - 1
-                );
-            e.currentTarget.blur();
-        });
 
         $("zoomIn") && ($("zoomIn").onclick = () => setZoom(zoom + 0.1));
         $("zoomOut") && ($("zoomOut").onclick = () => setZoom(zoom - 0.1));
@@ -405,6 +400,7 @@ console.log("✅ main script started");
         const storedHuman = Number(localStorage.getItem("flip:page") || "1");
         const desiredHuman = Number.isFinite(hashHuman) ? hashHuman : storedHuman;
         const desiredIndex = Math.max(0, Math.min(TOTAL_PAGES - 1, desiredHuman - 1));
+        setPageIndicator(desiredHuman);
 
         pageFlip.flip(desiredIndex);
 
@@ -412,6 +408,7 @@ console.log("✅ main script started");
             playRandomTurn();
             const human = (e.data ?? e) + 1;
             localStorage.setItem("flip:page", String(human));
+            setPageIndicator(human);
         });
 
         setTimeout(wireUI, 50);
