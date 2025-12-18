@@ -1,11 +1,10 @@
 (function () {
   console.log("✅ main script started");
-  console.log("🔥 SMB MAIN JS v2025-12-18 12:xx — PageMap clean rebuild");
+  console.log("🔥 SMB MAIN JS v2025-12-18 12:xx — clean + safe wiring");
 
   // ---- App namespace (ONE global, intentionally) ----
   window.SMB = window.SMB || {};
   const SMB = window.SMB;
-  console.log("SMB exists?", !!window.SMB);
 
   // ---- Config ----
   const BASE = "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/pages/";
@@ -33,15 +32,6 @@
     pan: ICON_BASE + "pan-gold.png",
   };
 
-  const STAGES = [
-    ["table", "Table"],
-    ["parquet", "Parquet"],
-    ["kitchen", "Counter"],
-    ["basement", "Basement"],
-    ["lawn", "Lawn"],
-    ["cancun", "Poolside"],
-  ];
-
   const $ = (id) => document.getElementById(id);
 
   function makeAudio(url, vol = 0.6) {
@@ -55,18 +45,12 @@
   // Page Mapping: Human ↔ Image (skip Edition page)
   // ===============================
   const PageMap = (() => {
-    // Human pages: what user types/sees
     const HUMAN_MIN = 1;
-
-    // 👇 Image numbers that exist as files but should NOT count in human numbering
-    // Edition page = lembo_0003.webp
-    const SKIP_IMAGE_NUMBERS = new Set([3]);
+    const SKIP_IMAGE_NUMBERS = new Set([3]); // lembo_0003.webp is Edition page
+    const HUMAN_MAX = TOTAL_IMAGES - SKIP_IMAGE_NUMBERS.size;
 
     const isInt = (n) => Number.isInteger(n);
     const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
-
-    // How many images are “counted” as human pages?
-    const HUMAN_MAX = TOTAL_IMAGES - SKIP_IMAGE_NUMBERS.size;
 
     const assertHuman = (humanPage) => {
       if (!isInt(humanPage)) throw new Error(`Human page must be an integer. Got: ${humanPage}`);
@@ -75,11 +59,8 @@
       }
     };
 
-    // Human -> image filename number (skipping certain image numbers)
     const humanToImageNumber = (humanPage) => {
       assertHuman(humanPage);
-
-      // Walk upward through image numbers, skipping any “non-human” pages
       let img = 0;
       let count = 0;
       while (count < humanPage) {
@@ -89,10 +70,8 @@
       return img;
     };
 
-    // Image filename number -> human (best effort; skips map to nearest valid human)
     const imageNumberToHuman = (imageNumber) => {
       if (!isInt(imageNumber)) throw new Error(`Image number must be an integer. Got: ${imageNumber}`);
-
       let count = 0;
       for (let img = 1; img <= imageNumber; img++) {
         if (!SKIP_IMAGE_NUMBERS.has(img)) count++;
@@ -100,40 +79,20 @@
       return clamp(count, HUMAN_MIN, HUMAN_MAX);
     };
 
-    // PageFlip uses 0-based index for loaded images
     const humanToFlipIndex = (humanPage) => humanToImageNumber(humanPage) - 1;
+    const flipIndexToHuman = (flipIndex) => imageNumberToHuman(flipIndex + 1);
 
-    const flipIndexToHuman = (flipIndex) => {
-      if (!isInt(flipIndex)) throw new Error(`Flip index must be an integer. Got: ${flipIndex}`);
-      const imageNumber = flipIndex + 1;
-      return imageNumberToHuman(imageNumber);
-    };
-
-    return {
-      HUMAN_MIN,
-      HUMAN_MAX,
-      humanToImageNumber,
-      imageNumberToHuman,
-      humanToFlipIndex,
-      flipIndexToHuman,
-    };
+    return { HUMAN_MIN, HUMAN_MAX, humanToImageNumber, imageNumberToHuman, humanToFlipIndex, flipIndexToHuman };
   })();
+
   SMB.PageMap = PageMap;
 
   // ---- State ----
   let soundOn = (localStorage.getItem("flip:sound") ?? "1") === "1";
   let zoom = Number(localStorage.getItem("flip:zoom") || "1");
-
   let stageKey = localStorage.getItem("flip:stage") || "table";
-  const stageEl = $("flipbook-stage");
 
-  let panX = 0,
-    panY = 0,
-    isPanning = false,
-    panSX = 0,
-    panSY = 0,
-    panOX = 0,
-    panOY = 0;
+  const stageEl = $("flipbook-stage");
 
   const SFX = {
     hover: makeAudio(SOUND_BASE + "hover.mp3", 0.35),
@@ -150,14 +109,6 @@
     ],
   };
 
-  function playSfx(key) {
-    if (!soundOn) return;
-    const a = SFX[key];
-    if (!a) return;
-    a.currentTime = 0;
-    a.play().catch(() => {});
-  }
-
   function playRandomTurn() {
     if (!soundOn) return;
     const a = SFX.pageTurns[Math.floor(Math.random() * SFX.pageTurns.length)];
@@ -171,7 +122,6 @@
     return `${BASE}lembo_${n}.webp`;
   }
 
-  // ✅ Load ALL images in their natural order (1..TOTAL_IMAGES)
   function buildPages() {
     return Array.from({ length: TOTAL_IMAGES }, (_, i) => pageUrlFromImageNumber(i + 1));
   }
@@ -198,64 +148,46 @@
     stageEl.style.setProperty("--stage-img", stageVar);
   }
 
-  function applyTransform() {
-    const wrap = $("flipbook-wrap");
-    if (!wrap) return;
-    wrap.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+  function getPF() {
+    return SMB.flipbook?.pageFlip;
   }
 
-  function updatePanCursor() {
-    const wrap = $("flipbook-wrap");
-    if (!wrap) return;
-    wrap.classList.toggle("can-pan", zoom > 1);
-  }
-
-  function setZoom(z) {
-    zoom = Math.max(0.6, Math.min(2.2, z));
-    localStorage.setItem("flip:zoom", String(zoom));
-    applyTransform();
-    updatePanCursor();
-  }
-
+  let uiWired = false;
   function wireUI() {
+    if (uiWired) return;
+    uiWired = true;
+
     paintIcons();
     applyStage();
-    applyTransform();
-    updatePanCursor();
 
-  const pf = SMB.flipbook?.pageFlip;
-   
-    // First/Last/Prev/Next (Human navigation)
-$("btnFirst").onclick = () => pf?.flip(PageMap.humanToFlipIndex(PageMap.HUMAN_MIN));
-$("btnLast").onclick  = () => pf?.flip(PageMap.humanToFlipIndex(PageMap.HUMAN_MAX));
-$("btnPrev").onclick  = () => pf?.flipPrev();
-$("btnNext").onclick  = () => pf?.flipNext();
+    // Buttons
+    const btnFirst = $("btnFirst");
+    const btnLast = $("btnLast");
+    const btnPrev = $("btnPrev");
+    const btnNext = $("btnNext");
 
-    // Page Jump (Human page in)
+    btnFirst && (btnFirst.onclick = () => getPF()?.flip(PageMap.humanToFlipIndex(PageMap.HUMAN_MIN)));
+    btnLast && (btnLast.onclick = () => getPF()?.flip(PageMap.humanToFlipIndex(PageMap.HUMAN_MAX)));
+    btnPrev && (btnPrev.onclick = () => getPF()?.flipPrev());
+    btnNext && (btnNext.onclick = () => getPF()?.flipNext());
+
+    // Page jump
     const pageJump = $("pageJump");
-        pageJump?.addEventListener("keydown", (e) => {
+    pageJump?.addEventListener("keydown", (e) => {
       if (e.key !== "Enter") return;
       const n = parseInt(e.currentTarget.value, 10);
       if (!Number.isFinite(n)) return;
 
       const safeHuman = Math.max(PageMap.HUMAN_MIN, Math.min(PageMap.HUMAN_MAX, n));
-      pf?.flip(PageMap.humanToFlipIndex(safeHuman));
+      getPF()?.flip(PageMap.humanToFlipIndex(safeHuman));
     });
-     }
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", wireUI, { once: true });
-} else {
-  wireUI();
-}
-  
-    // Optional: quick console sanity check
+    // quick sanity table
     console.table(
-      [PageMap.HUMAN_MIN, 2, 3, 4, 5, PageMap.HUMAN_MAX].map((h) => ({
+      [1, 2, 3, 4, 5].map((h) => ({
         human: h,
         image: PageMap.humanToImageNumber(h),
         flipIndex: PageMap.humanToFlipIndex(h),
-        url: pageUrlFromImageNumber(PageMap.humanToImageNumber(h)),
       }))
     );
   }
@@ -265,6 +197,7 @@ if (document.readyState === "loading") {
     if (!el) return false;
     if (!window.St || typeof window.St.PageFlip !== "function") return false;
     if (el.dataset.flipInit === "1") return true;
+
     el.dataset.flipInit = "1";
 
     const pageFlip = new St.PageFlip(el, {
@@ -285,12 +218,23 @@ if (document.readyState === "loading") {
 
     pageFlip.on("flip", () => playRandomTurn());
 
+    // Now that PF exists, ensure UI is wired
+    wireUI();
+
     return true;
   }
 
+  // Wire UI once DOM exists (safe even before PF exists)
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", wireUI, { once: true });
+  } else {
+    wireUI();
+  }
+
+  // Retry init until St.PageFlip is ready
   let tries = 0;
   const t = setInterval(() => {
     tries++;
-    if (init() || tries > 20) clearInterval(t);
+    if (init() || tries > 40) clearInterval(t);
   }, 50);
 })();
