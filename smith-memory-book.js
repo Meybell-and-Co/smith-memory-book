@@ -66,12 +66,12 @@
 
     // Highest human page you want users to navigate to.
     // Tie it to TOTAL_PAGES so you don't duplicate numbers.
-    const HUMAN_MAX = TOTAL_PAGES;
+    const HUMAN_MAX = HUMAN_MIN + (TOTAL_PAGES - IMAGE_FIRST_FOR_HUMAN_MIN);
 
     // The image number (as in filename number) that corresponds to HUMAN_MIN.
     // If Human page 1 = lembo_0001.webp, set IMAGE_FIRST_FOR_HUMAN_MIN = 1.
     // If Human page 1 = lembo_0002.webp, set IMAGE_FIRST_FOR_HUMAN_MIN = 2, etc.
-    const IMAGE_FIRST_FOR_HUMAN_MIN = 1;
+    const IMAGE_FIRST_FOR_HUMAN_MIN = 2;
 
     // St.PageFlip uses 0-based indexes for flip(n) in your current code (you do "- 1"),
     // so keep this true.
@@ -79,7 +79,7 @@
 
     // Optional: override labels for special pages (no folio, etc.)
     const HUMAN_LABEL_OVERRIDES = new Map([
-      // [3, "Edition page"],
+      // [2, "Edition page"],
     ]);
 
     const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
