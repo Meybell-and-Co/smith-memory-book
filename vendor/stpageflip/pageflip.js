@@ -1,3 +1,8 @@
+/**
+ * Vendor: StPageFlip
+ * Pinned version – do not edit directly
+ */
+
 import {PageFlip} from 'page-flip';
 
 document.addEventListener('DOMContentLoaded', function() {
