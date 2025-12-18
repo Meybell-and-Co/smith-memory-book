@@ -4,6 +4,7 @@
   // ---- App namespace (ONE global, intentionally) ----
   window.SMB = window.SMB || {};
   const SMB = window.SMB;
+  console.log("SMB exists?", !!window.SMB);
 
   // ---- Config ----
   const BASE = "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/pages/";
