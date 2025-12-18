@@ -1,5 +1,6 @@
 (function () {
   console.log("✅ main script started");
+  console.log("🔥 SMB MAIN JS v2025-12-18 11:58");
 
   // ---- App namespace (ONE global, intentionally) ----
   window.SMB = window.SMB || {};
