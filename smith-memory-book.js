@@ -223,33 +223,32 @@
     applyTransform();
     updatePanCursor();
 
+  const pf = SMB.flipbook?.pageFlip;
+   
     // First/Last/Prev/Next (Human navigation)
-    $("btnFirst") &&
-      ($("btnFirst").onclick = () => SMB.flipbook?.pageFlip?.flip(PageMap.humanToFlipIndex(PageMap.HUMAN_MIN)));
-
-    $("btnLast") &&
-      ($("btnLast").onclick = () => SMB.flipbook?.pageFlip?.flip(PageMap.humanToFlipIndex(PageMap.HUMAN_MAX)));
-
-    $("btnPrev") && ($("btnPrev").onclick = () => SMB.flipbook?.pageFlip?.flipPrev());
-    $("btnNext") && ($("btnNext").onclick = () => SMB.flipbook?.pageFlip?.flipNext());
+$("btnFirst").onclick = () => pf?.flip(PageMap.humanToFlipIndex(PageMap.HUMAN_MIN));
+$("btnLast").onclick  = () => pf?.flip(PageMap.humanToFlipIndex(PageMap.HUMAN_MAX));
+$("btnPrev").onclick  = () => pf?.flipPrev();
+$("btnNext").onclick  = () => pf?.flipNext();
 
     // Page Jump (Human page in)
     const pageJump = $("pageJump");
-    pageJump?.addEventListener("keydown", (e) => {
+        pageJump?.addEventListener("keydown", (e) => {
       if (e.key !== "Enter") return;
       const n = parseInt(e.currentTarget.value, 10);
       if (!Number.isFinite(n)) return;
 
       const safeHuman = Math.max(PageMap.HUMAN_MIN, Math.min(PageMap.HUMAN_MAX, n));
-      SMB.flipbook?.pageFlip?.flip(PageMap.humanToFlipIndex(safeHuman));
+      pf?.flip(PageMap.humanToFlipIndex(safeHuman));
     });
+     }
 
-      // Ensure icons/stage paint even if PageFlip init is delayed
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", wireUI, { once: true });
-  } else {
-    wireUI();
-  }
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", wireUI, { once: true });
+} else {
+  wireUI();
+}
+  
     // Optional: quick console sanity check
     console.table(
       [PageMap.HUMAN_MIN, 2, 3, 4, 5, PageMap.HUMAN_MAX].map((h) => ({
