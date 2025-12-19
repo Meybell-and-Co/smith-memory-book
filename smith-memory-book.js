@@ -476,7 +476,24 @@ console.log("✅ main script started");
             mobileScrollSupport: true,
         });
 
-        pageFlip.loadFromImages(buildPages());
+        const pages = buildPages();
+        const container = document.getElementById("flipbook");
+        container.innerHTML = "";
+
+        pages.forEach((src) => {
+            const page = document.createElement("div");
+            page.className = "page";
+
+            page.innerHTML = `
+    <div class="page-content">
+      <div class="page-image" style="background-image:url('${src}')"></div>
+    </div>
+  `;
+            container.appendChild(page);
+        });
+
+        pageFlip.loadFromHTML(container.querySelectorAll(".page"));
+        
         window.__flipbook = { pageFlip };
 
         // choose start page: hash beats localStorage beats 1
