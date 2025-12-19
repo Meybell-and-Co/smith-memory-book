@@ -339,6 +339,8 @@ console.log("✅ main script started");
             }
         );
 
+        document.title = `Zoom ${Math.round(zoom * 100)}%`;
+
         $("btnTiles") &&
             ($("btnTiles").onclick = () => {
                 $("tiles")?.classList.toggle("is-open");
