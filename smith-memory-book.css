@@ -1,171 +1,171 @@
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap");
 
 :root {
-    --ui-font: "Montserrat", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    --charcoal: #2E2E2E;
-    --gold: #CBA135;
-    --stage-table: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/highlights/tabletop.webp");
-    --stage-parquet: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/highlights/parquet.webp");
-    --stage-kitchen: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/highlights/marble-kitchen.webp");
-    --stage-basement: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/highlights/ginnys-basement-carpet.webp");
-    --stage-lawn: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/highlights/lawn.webp");
-    --stage-cancun: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/highlights/cancun-waters.webp");
-    --book-frame: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/highlights/smith-book-frame.webp");
+  --ui-font: "Montserrat", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  --charcoal: #2E2E2E;
+  --gold: #CBA135;
+  --stage-table: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/highlights/tabletop.webp");
+  --stage-parquet: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/highlights/parquet.webp");
+  --stage-kitchen: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/highlights/marble-kitchen.webp");
+  --stage-basement: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/highlights/ginnys-basement-carpet.webp");
+  --stage-lawn: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/highlights/lawn.webp");
+  --stage-cancun: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/highlights/cancun-waters.webp");
+  --book-frame: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/highlights/smith-book-frame.webp");
 }
 
 body,
 button,
 input {
-    font-family: var(--ui-font);
+  font-family: var(--ui-font);
 }
 
 #flipbook-stage {
-    position: fixed;
-    inset: 0;
-    width: 100vw;
-    height: 100vh;
-    background: var(--stage-img, var(--stage-table)) center / cover no-repeat;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--stage-img, var(--stage-table)) center / cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 #flipbook-stage::before {
-    content: "";
-    position: absolute;
-    inset: -4%;
-    ;
-    background: var(--book-frame) center / contain no-repeat;
-    pointer-events: none;
-    z-index: 1;
+  content: "";
+  position: absolute;
+  inset: -4%;
+  ;
+  background: var(--book-frame) center / contain no-repeat;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .stagemenu {
-    display: none;
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid color-mix(in srgb, var(--charcoal) 35%, transparent);
+  display: none;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--charcoal) 35%, transparent);
 }
 
 .stagemenu.is-open {
-    display: block;
+  display: block;
 }
 
 .stagemenu button {
-    display: block;
-    width: 100%;
-    text-align: left;
+  display: block;
+  width: 100%;
+  text-align: left;
 }
 
 #flipbook-wrap {
-    width: min(96vw, 1400px);
-    height: min(82vh, 900px);
-    min-height: 520px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transform-origin: center center;
-    cursor: default;
-    touch-action: none;
-    position: relative;
-    z-index: 2;
+  width: min(calc(100vw - 260px), 1700px);
+  height: min(calc(100vh - 320px), 1050px);
+  min-height: 520px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center center;
+  cursor: default;
+  touch-action: none;
+  position: relative;
+  z-index: 2;
 }
 
 #flipbook-wrap.can-pan {
-    cursor: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/flipbook-ui-icons/pan-gold.png") 16 16, grab;
+  cursor: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/flipbook-ui-icons/pan-gold.png") 16 16, grab;
 }
 
 #flipbook-wrap.can-pan:active {
-    cursor: grabbing;
+  cursor: grabbing;
 }
 
 #flipbook {
-    width: 100%;
-    height: 100%;
-    transform-origin: center center;
+  width: 100%;
+  height: 100%;
+  transform-origin: center center;
 }
 
 .flipbar {
-    position: absolute;
-    left: 50%;
-    bottom: 12px;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 10px;
-    background: color-mix(in srgb, var(--charcoal) 72%, transparent);
-    border: 1px solid rgba(255, 255, 255, .12);
-    border-radius: 999px;
-    backdrop-filter: blur(8px);
-    z-index: 99;
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: color-mix(in srgb, var(--charcoal) 72%, transparent);
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+  z-index: 99;
 }
 
 #flipbook-wrap,
 #tiles {
-    position: relative;
-    z-index: 2;
+  position: relative;
+  z-index: 2;
 }
 
 .ibtn {
-    width: 38px;
-    height: 38px;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, .10);
-    background: rgba(255, 255, 255, .06);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: #fff;
-    font: 20px/1 var(--ui-font);
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .10);
+  background: rgba(255, 255, 255, .06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #fff;
+  font: 20px/1 var(--ui-font);
 }
 
 .ibtn:hover {
-    background: rgba(255, 255, 255, .10);
+  background: rgba(255, 255, 255, .10);
 }
 
 .ibtn:active {
-    transform: translateY(1px);
+  transform: translateY(1px);
 }
 
 .ibtn img {
-    width: 18px;
-    height: 18px;
-    display: block;
-    pointer-events: none;
+  width: 18px;
+  height: 18px;
+  display: block;
+  pointer-events: none;
 }
 
 .sep {
-    width: 1px;
-    height: 22px;
-    background: rgba(255, 255, 255, .18);
-    margin: 0 4px;
+  width: 1px;
+  height: 22px;
+  background: rgba(255, 255, 255, .18);
+  margin: 0 4px;
 }
 
 .pageJump {
-    font-family: var(--ui-font);
-    font-size: 16px;
-    font-weight: 600;
-    width: 140px;
-    min-width: 140px;
-    height: 38px;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, .12);
-    background: rgba(255, 255, 255, .06);
-    color: var(--gold);
-    text-align: center;
-    outline: none;
+  font-family: var(--ui-font);
+  font-size: 16px;
+  font-weight: 600;
+  width: 140px;
+  min-width: 140px;
+  height: 38px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  background: rgba(255, 255, 255, .06);
+  color: var(--gold);
+  text-align: center;
+  outline: none;
 }
 
-.pageIndicator{
+.pageIndicator {
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
 
-.pageTotal{
+.pageTotal {
   height: 38px;
   display: inline-flex;
   align-items: center;
@@ -177,114 +177,114 @@ input {
 }
 
 .pageJump::placeholder {
-    color: color-mix(in srgb, var(--gold) 55%, transparent);
+  color: color-mix(in srgb, var(--gold) 55%, transparent);
 }
 
 .moremenu {
-    position: absolute;
-    bottom: 54px;
-    right: 12px;
-    display: none;
-    min-width: 200px;
-    background: rgba(20, 20, 20, .94);
-    border: 1px solid rgba(255, 255, 255, .10);
-    border-radius: 14px;
-    overflow: hidden;
-    box-shadow: 0 18px 40px rgba(0, 0, 0, .35);
+  position: absolute;
+  bottom: 54px;
+  right: 12px;
+  display: none;
+  min-width: 200px;
+  background: rgba(20, 20, 20, .94);
+  border: 1px solid rgba(255, 255, 255, .10);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .35);
 }
 
 .moremenu.is-open {
-    display: block;
+  display: block;
 }
 
 .moremenu button {
-    width: 100%;
-    background: transparent;
-    border: 0;
-    color: rgba(255, 255, 255, .92);
-    padding: 10px 12px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    font: 14px/1.2 var(--ui-font);
+  width: 100%;
+  background: transparent;
+  border: 0;
+  color: rgba(255, 255, 255, .92);
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font: 14px/1.2 var(--ui-font);
 }
 
 .moremenu button:hover {
-    background: rgba(255, 255, 255, .07);
+  background: rgba(255, 255, 255, .07);
 }
 
 .moremenu img {
-    width: 16px;
-    height: 16px;
+  width: 16px;
+  height: 16px;
 }
 
 .tiles {
-    position: absolute;
-    inset: 0;
-    background: rgba(255, 255, 255, .92);
-    display: none;
-    z-index: 120;
-    overflow: auto;
-    padding: 14px;
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, .92);
+  display: none;
+  z-index: 120;
+  overflow: auto;
+  padding: 14px;
 }
 
 .tiles.is-open {
-    display: block;
+  display: block;
 }
 
 .tiles-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
 }
 
 .tiles-close {
-    border-radius: 999px;
-    padding: 8px 12px;
-    border: 1px solid rgba(0, 0, 0, .12);
-    background: #fff;
-    cursor: pointer;
-    position: fixed;
-    bottom: 18px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: block;
-    margin: 18px auto;
-    z-index: 5;
+  border-radius: 999px;
+  padding: 8px 12px;
+  border: 1px solid rgba(0, 0, 0, .12);
+  background: #fff;
+  cursor: pointer;
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: block;
+  margin: 18px auto;
+  z-index: 5;
 }
 
 .tiles-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
 }
 
 .tile {
-    border: 1px solid rgba(0, 0, 0, .12);
-    border-radius: 12px;
-    overflow: hidden;
-    background: #fff;
-    cursor: pointer;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, .08);
+  border: 1px solid rgba(0, 0, 0, .12);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .08);
 }
 
 .tile img {
-    width: 100%;
-    display: block;
+  width: 100%;
+  display: block;
 }
 
 .tile .n {
-    padding: 8px 10px;
-    font-size: 12px;
-    opacity: .75;
-    display: flex;
-    justify-content: space-between;
+  padding: 8px 10px;
+  font-size: 12px;
+  opacity: .75;
+  display: flex;
+  justify-content: space-between;
 }
 
 .flipbar,
 .moremenu,
 .tiles {
-    user-select: none;
+  user-select: none;
 }
