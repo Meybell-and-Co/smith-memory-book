@@ -256,6 +256,7 @@ console.log("✅ main script started");
                 if (zoom <= 1) return;
                 isPanning = true;
                 wrap.classList.add("is-dragging");
+                console.log("drag start", wrap.className);
                 wrap.setPointerCapture(e.pointerId);
                 panSX = e.clientX;
                 panSY = e.clientY;
@@ -272,10 +273,17 @@ console.log("✅ main script started");
 
             wrap.addEventListener("pointerup", () => {
                 isPanning = false;
+                wrap.classList.remove("is-dragging");
+                console.log("drag end", wrap.className);
             });
 
             wrap.addEventListener("pointerleave", () => {
                 isPanning = false;
+                wrap.classList.remove("is-dragging");
+            });
+            wrap.addEventListener("pointercancel", () => {
+                isPanning = false;
+                wrap.classList.remove("is-dragging");
             });
         }
 

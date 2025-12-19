@@ -87,12 +87,12 @@ input {
 
 #flipbook-wrap.can-pan,
 #flipbook-wrap.can-pan * {
-  cursor: var(--cursor-open) 16 16, grab;
+  cursor: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/flipbook-ui-icons/grab-open-gold.png") 16 16, grab;
 }
 
 #flipbook-wrap.is-dragging,
 #flipbook-wrap.is-dragging * {
-  cursor: var(--cursor-closed) 16 16, grabbing;
+  cursor: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/flipbook-ui-icons/grab-closed-gold.png") 16 16, grabbing;
 }
 
 #flipbook {
