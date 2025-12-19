@@ -43,6 +43,8 @@ console.log("✅ main script started");
 
     const $ = (id) => document.getElementById(id);
 
+    const overlay = $("cover-inside-overlay");
+    
     function makeAudio(url, vol = 0.6) {
         const a = new Audio(url);
         a.preload = "auto";
@@ -101,6 +103,16 @@ console.log("✅ main script started");
 
         coverShiftX = isFront ? +shift : isBack ? -shift : 0;
         applyTransform();
+
+        if (!overlay) return;
+
+        if (isFront || isBack) {
+            overlay.style.opacity = 1;
+            overlay.style.transform = "rotateY(0deg)";
+        } else {
+            overlay.style.opacity = 0;
+        }
+
     }
 
     function playSfx(key) {
@@ -190,10 +202,10 @@ console.log("✅ main script started");
     }
 
     function applyTransform() {
-  const wrap = $("flipbook-wrap");
-  if (!wrap) return;
-  wrap.style.transform = `translate(${panX + coverShiftX}px, ${panY}px) scale(${zoom})`;
-}
+        const wrap = $("flipbook-wrap");
+        if (!wrap) return;
+        wrap.style.transform = `translate(${panX + coverShiftX}px, ${panY}px) scale(${zoom})`;
+    }
 
 
     function syncPageIndicator(humanPage) {
