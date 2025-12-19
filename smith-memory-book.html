@@ -5,11 +5,11 @@
   <title>Smith Memory Book – Flipbook</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<script
-  src="vendor/stpageflip/page-flip.browser.js"
-  onload="console.log('✅ PageFlip loaded (local vendor)')"
-  onerror="console.error('❌ PageFlip failed to load (local vendor)')"
-></script>
+  <script
+    src="https://unpkg.com/page-flip@2.0.7/dist/js/page-flip.browser.js"
+    onload="console.log('✅ PageFlip loaded')"
+    onerror="console.error('❌ PageFlip failed to load')"
+  ></script>
 
   <link rel="stylesheet" href="smith-memory-book.css" />
   <script defer src="smith-memory-book.js"></script>
@@ -79,7 +79,6 @@
         <button id="btnFull" type="button"><img data-ikey="fullscreen" alt="" />Full screen</button>
         <button id="btnSearch" type="button"><img data-ikey="search" alt="" />Search</button>
 
-        
         <div id="stageMenu" class="stagemenu"></div>
       </div>
     </div>
