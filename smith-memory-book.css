@@ -453,8 +453,8 @@ body.is-reading #flipbook-wrap {
   pointer-events: none;
 
   inset: auto;
-  right: 8%;
-  bottom: 18%;
+  right: 20%;
+  bottom: 25%;
 
   width: 180px;
   height: 180px;
