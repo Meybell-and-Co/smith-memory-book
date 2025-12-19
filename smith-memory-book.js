@@ -255,6 +255,7 @@ console.log("✅ main script started");
             wrap.addEventListener("pointerdown", (e) => {
                 if (zoom <= 1) return;
                 isPanning = true;
+                wrap.classList.add("is-dragging");
                 wrap.setPointerCapture(e.pointerId);
                 panSX = e.clientX;
                 panSY = e.clientY;
