@@ -44,7 +44,7 @@ console.log("✅ main script started");
     const $ = (id) => document.getElementById(id);
 
     const overlay = $("cover-inside-overlay");
-    
+
     function makeAudio(url, vol = 0.6) {
         const a = new Audio(url);
         a.preload = "auto";
@@ -523,6 +523,14 @@ console.log("✅ main script started");
         );
     }
 
+    document.getElementById("startBtn")?.addEventListener("click", () => {
+        document.body.classList.add("is-reading");
+        setTimeout(() => {
+            init();                 // run your init once
+            window.__flipbook?.pageFlip?.flip(humanToIdx(2));  // or wherever your “first real layout” is
+        }, 220);
+    });
+
     function init() {
         const el = $("flipbook");
         if (!el) return false;
@@ -601,7 +609,7 @@ console.log("✅ main script started");
 
         pageFlip.flip(desiredIndex);
         syncPageIndicator(desiredHumanClamped);
-        updateCoverMode(desiredIndex);
+        updateNavLocks(desiredHumanClamped);
 
         pageFlip.on("flip", (e) => {
             playRandomTurn();
@@ -610,17 +618,23 @@ console.log("✅ main script started");
 
             localStorage.setItem("flip:page", String(human));
             syncPageIndicator(human);
-            updateCoverMode(idx);
+            updateNavLocks(human);
         });
+
+        function updateNavLocks(human) {
+            const lock = human <= 1;
+            $("btnPrev")?.toggleAttribute("disabled", lock);
+            $("btnFirst")?.toggleAttribute("disabled", lock);
+        }
 
         setTimeout(wireUI, 50);
         return true;
     }
 
-    let tries = 0;
-    const t = setInterval(() => {
-        tries++;
-        const ok = init();
-        if (ok || tries > 400) clearInterval(t);
-    }, 50);
+    //let tries = 0;
+    //const t = setInterval(() => {
+    //        tries++;
+    //      const ok = init();
+    //    if (ok || tries > 400) clearInterval(t);
+    //}, 50);
 })();

@@ -20,7 +20,7 @@ input {
 }
 
 #flipbook-stage {
-  position: fixed;
+  position: relative;
   inset: 0;
   width: 100vw;
   height: 100vh;
@@ -79,6 +79,31 @@ input {
   transition: cursor 0.05s linear;
 }
 
+#startScreen{
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+#startBtn{
+  width: min(780px, 92vw);
+  aspect-ratio: 4 / 3; /* tweak to match cover proportions */
+  border: 0;
+  background: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/pages/lembo_0001.webp") center / contain no-repeat;
+  cursor: pointer;
+  filter: drop-shadow(0 12px 24px rgba(0,0,0,.35));
+  background-color: transparent;
+}
+
+body.is-reading #startScreen{
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease;
+}
+
 #flipbook-wrap {
 --cursor-open: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/flipbook-ui-icons/grab-open-gold.png?v=2");
 --cursor-closed: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/flipbook-ui-icons/grab-closed-gold.png?v=2");
@@ -97,6 +122,9 @@ input {
 body.is-cover-only #flipbook-wrap::before {
   opacity: 0 !important;
 }
+
+#flipbook-wrap{ opacity: 0; transition: opacity .25s ease; }
+body.is-reading #flipbook-wrap{ opacity: 1; }
 
 /* Covers: ensure the cover art fills the page area cleanly */
 .page.page-cover .page-image{
