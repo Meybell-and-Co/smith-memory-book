@@ -53,7 +53,8 @@ input {
 #cover-inside-overlay {
   position: absolute;
   inset: 0;
-  background: #e2e2e2; /* or textured */
+  background: #e2e2e2;
+  /* or textured */
   opacity: 0;
   pointer-events: none;
   transform-origin: left center;
@@ -79,7 +80,7 @@ input {
   transition: cursor 0.05s linear;
 }
 
-#startScreen{
+#startScreen {
   position: absolute;
   inset: 0;
   display: flex;
@@ -88,25 +89,26 @@ input {
   z-index: 50;
 }
 
-#startBtn{
+#startBtn {
   width: min(780px, 92vw);
-  aspect-ratio: 4 / 3; /* tweak to match cover proportions */
+  aspect-ratio: 4 / 3;
+  /* tweak to match cover proportions */
   border: 0;
   background: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/pages/lembo_0001.webp") center / contain no-repeat;
   cursor: pointer;
-  filter: drop-shadow(0 12px 24px rgba(0,0,0,.35));
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, .35));
   background-color: transparent;
 }
 
-body.is-reading #startScreen{
+body.is-reading #startScreen {
   opacity: 0;
   pointer-events: none;
   transition: opacity .25s ease;
 }
 
 #flipbook-wrap {
---cursor-open: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/flipbook-ui-icons/grab-open-gold.png?v=2");
---cursor-closed: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/flipbook-ui-icons/grab-closed-gold.png?v=2");
+  --cursor-open: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/flipbook-ui-icons/grab-open-gold.png?v=2");
+  --cursor-closed: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/flipbook-ui-icons/grab-closed-gold.png?v=2");
 }
 
 #flipbook-wrap::before {
@@ -123,16 +125,22 @@ body.is-cover-only #flipbook-wrap::before {
   opacity: 0 !important;
 }
 
-#flipbook-wrap{ opacity: 0; transition: opacity .25s ease; }
-body.is-reading #flipbook-wrap{ opacity: 1; }
+#flipbook-wrap {
+  opacity: 0;
+  transition: opacity .25s ease;
+}
+
+body.is-reading #flipbook-wrap {
+  opacity: 1;
+}
 
 /* Covers: ensure the cover art fills the page area cleanly */
-.page.page-cover .page-image{
+.page.page-cover .page-image {
   background-size: contain;
 }
 
 /* Ghost pages: absolutely no shadows, no rendering artifacts */
-.page.page-ghost{
+.page.page-ghost {
   opacity: 0 !important;
   visibility: hidden !important;
   box-shadow: none !important;
@@ -365,16 +373,16 @@ body.is-reading #flipbook-wrap{ opacity: 1; }
 
 .page,
 .page .page-content,
-.page .page-image{
+.page .page-image {
   width: 100%;
   height: 100%;
 }
 
-.page .page-content{
+.page .page-content {
   display: block;
 }
 
-.page .page-image{
+.page .page-image {
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
@@ -382,7 +390,7 @@ body.is-reading #flipbook-wrap{ opacity: 1; }
 
 /* 👻
 /* Ghost spacer pages — fully inert */
-.page.page-ghost{
+.page.page-ghost {
   background: transparent !important;
   box-shadow: none !important;
   border: 0 !important;
@@ -399,6 +407,133 @@ body.is-reading #flipbook-wrap{ opacity: 1; }
 /* nuke all inner rendering */
 .page.page-ghost *,
 .page.page-ghost::before,
-.page.page-ghost::after{
+.page.page-ghost::after {
   display: none !important;
+}
+
+/* ---- Resting vs Reading modes ---- */
+#flipbook-stage.is-resting #flipbar {
+  display: none;
+}
+
+/* When we enter reading, flipbar animates in */
+#flipbar.is-entering {
+  animation: flipbarIn 520ms cubic-bezier(.2, .9, .2, 1) both;
+}
+
+@keyframes flipbarIn {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 18px) scale(.98);
+    filter: blur(2px);
+  }
+
+  60% {
+    opacity: 1;
+    transform: translate(-50%, -6px) scale(1);
+    filter: blur(0px);
+  }
+
+  80% {
+    opacity: 1;
+    transform: translate(-50%, 2px) scale(1);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0px) scale(1);
+  }
+}
+
+/* ---- Interaction shield to stop peel-back on page 1 ---- */
+#interactionShield {
+  position: absolute;
+  inset: 0;
+  z-index: 999;
+  /* above the flipbook pages */
+  display: none;
+  pointer-events: auto;
+  /* intercepts mouse */
+  background: transparent;
+}
+
+#interactionShield.is-on {
+  display: block;
+}
+
+.ibtn.is-disabled {
+  opacity: 0.35;
+  filter: grayscale(1);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.ibtn.cover-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background-size: 70% 70%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* ---- Open Toast ---- */
+#openToast {
+  position: fixed;
+  left: 50%;
+  bottom: 96px;
+  /* floats just above where flipbar will land */
+  transform: translateX(-50%);
+  padding: 10px 16px;
+  border-radius: 18px;
+
+  font-family: var(--ui-font);
+  font-size: 14px;
+  letter-spacing: .2px;
+
+  background: rgba(20, 20, 20, 0.82);
+  color: #F7F6FB;
+  backdrop-filter: blur(6px);
+
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, .25),
+    inset 0 0 0 1px rgba(255, 255, 255, .08);
+
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* visible state */
+#openToast.is-visible {
+  animation: toastIn 420ms ease-out both;
+}
+
+/* graceful exit */
+#openToast.is-hiding {
+  animation: toastOut 280ms ease-in both;
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes toastOut {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate(-50%, -6px);
+  }
 }

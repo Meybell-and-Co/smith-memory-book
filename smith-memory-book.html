@@ -13,87 +13,92 @@
   <script defer src="smith-memory-book.js"></script>
 
 </head>
+
 <body>
   <div id="flipbook-container">
 
-<div id="flipbook-stage">
-  <div id="startScreen">
-  <button id="startBtn" type="button" aria-label="Open Book"></button>
-</div>
-  <div id="flipbook-wrap">
-    <div id="flipbook"></div>
-    <div id="cover-inside-overlay"></div>
+    <div id="flipbook-stage">
+      <div id="startScreen">
+        <button id="startBtn" type="button" aria-label="Open Book"></button>
+      </div>
+      <div id="flipbook-wrap">
+        <div id="interactionShield" aria-hidden="true"></div>
+        <div id="flipbook"></div>
+        <div id="cover-inside-overlay"></div>
+      </div>
+    </div>
+
+    <div class="tiles" id="tiles">
+      <div class="tiles-top">
+        <strong>All pages</strong>
+        <button id="tilesClose" class="tiles-close" type="button">Close</button>
+      </div>
+      <div class="tiles-grid" id="tilesGrid"></div>
+    </div>
+
+    <div class="flipbar" id="flipbar">
+      <button id="btnFirst" class="ibtn" title="First" type="button">
+        <img data-ikey="start" alt="First" />
+      </button>
+
+      <button id="btnPrev" class="ibtn" title="Previous" type="button">
+        <img data-ikey="prev" alt="Previous" />
+      </button>
+
+      <div class="pageIndicator" aria-label="Page Indicator">
+        <input id="pageJump" class="pageJump" inputmode="numeric" aria-label="Page Number" />
+      </div>
+
+      <button id="btnNext" class="ibtn" title="Next" type="button">
+        <img data-ikey="next" alt="Next" />
+      </button>
+
+      <button id="btnLast" class="ibtn" title="Last" type="button">
+        <img data-ikey="end" alt="Last" />
+      </button>
+
+      <div class="sep"></div>
+
+      <button id="zoomOut" class="ibtn" title="Zoom Out" type="button">
+        <img data-ikey="zoomOut" alt="Zoom Out" />
+      </button>
+
+      <button id="zoomReset" class="ibtn" title="Reset" type="button">
+        <img data-ikey="reset" alt="Reset">
+      </button>
+
+      <button id="zoomIn" class="ibtn" title="Zoom In" type="button">
+        <img data-ikey="zoomIn" alt="Zoom In" />
+      </button>
+
+      <div class="sep"></div>
+
+      <button id="btnTiles" class="ibtn" title="Tiles" type="button">
+        <img data-ikey="tiles" alt="Tiles" />
+      </button>
+
+      <button id="btnSound" class="ibtn" title="Sound" type="button">
+        <img data-ikey="sound" alt="Sound" />
+      </button>
+
+      <button id="btnMore" class="ibtn" title="More" type="button">
+        <img data-ikey="more" alt="More" />
+      </button>
+
+      <div id="moreMenu" class="moremenu">
+        <button id="btnShare" type="button"><img data-ikey="share" alt="" />Share</button>
+        <button id="btnStage" type="button"><img data-ikey="pan" alt="" />Stage</button>
+        <button id="btnPrint" type="button"><img data-ikey="print" alt="" />Print</button>
+        <button id="btnFull" type="button"><img data-ikey="fullscreen" alt="" />Full Screen</button>
+        <button id="btnSearch" type="button"><img data-ikey="search" alt="" />Search</button>
+        <div id="stageMenu" class="stagemenu"></div>
+      </div>
+
+      <!-- ✅ Toast lives OUTSIDE the menu -->
+      <div id="openToast" aria-live="polite">Hello. Click to begin</div>
+
+    </div>
   </div>
-</div>
-
-<div class="tiles" id="tiles">
-  <div class="tiles-top">
-    <strong>All pages</strong>
-    <button id="tilesClose" class="tiles-close" type="button">Close</button>
-  </div>
-  <div class="tiles-grid" id="tilesGrid"></div>
-</div>
-
-<div class="flipbar" id="flipbar">
-  <button id="btnFirst" class="ibtn" title="First" type="button">
-    <img data-ikey="start" alt="First" />
-  </button>
-
-  <button id="btnPrev" class="ibtn" title="Previous" type="button">
-    <img data-ikey="prev" alt="Previous" />
-  </button>
-
-  <div class="pageIndicator" aria-label="Page Indicator">
-    <input id="pageJump" class="pageJump" inputmode="numeric" aria-label="Page Number" />
-  </div>
-
-  <button id="btnNext" class="ibtn" title="Next" type="button">
-    <img data-ikey="next" alt="Next" />
-  </button>
-
-  <button id="btnLast" class="ibtn" title="Last" type="button">
-    <img data-ikey="end" alt="Last" />
-  </button>
-
-  <div class="sep"></div>
-
-  <button id="zoomOut" class="ibtn" title="Zoom Out" type="button">
-    <img data-ikey="zoomOut" alt="Zoom Out" />
-  </button>
-
-  <button id="zoomReset" class="ibtn" title="Reset" type="button">
-    <img data-ikey="reset" alt="Reset">
-  </button>
-
-  <button id="zoomIn" class="ibtn" title="Zoom In" type="button">
-    <img data-ikey="zoomIn" alt="Zoom In" />
-  </button>
-
-  <div class="sep"></div>
-
-  <button id="btnTiles" class="ibtn" title="Tiles" type="button">
-    <img data-ikey="tiles" alt="Tiles" />
-  </button>
-
-  <button id="btnSound" class="ibtn" title="Sound" type="button">
-    <img data-ikey="sound" alt="Sound" />
-  </button>
-
-  <button id="btnMore" class="ibtn" title="More" type="button">
-    <img data-ikey="more" alt="More" />
-  </button>
-
-  <div id="moreMenu" class="moremenu">
-    <button id="btnShare" type="button"><img data-ikey="share" alt="" />Share</button>
-    <button id="btnStage" type="button"><img data-ikey="pan" alt="" />Stage</button>
-    <button id="btnPrint" type="button"><img data-ikey="print" alt="" />Print</button>
-    <button id="btnFull" type="button"><img data-ikey="fullscreen" alt="" />Full Screen</button>
-    <button id="btnSearch" type="button"><img data-ikey="search" alt="" />Search</button>
-
-    <div id="stageMenu" class="stagemenu"></div>
-  </div>
-</div>
-</div>
 </body>
 
 </html>
