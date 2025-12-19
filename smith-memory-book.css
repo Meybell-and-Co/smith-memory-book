@@ -158,6 +158,23 @@ input {
     outline: none;
 }
 
+.pageIndicator{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pageTotal{
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  font: 18px/1 var(--ui-font);
+  font-weight: 700;
+  color: color-mix(in srgb, var(--gold) 70%, white);
+  padding-right: 4px;
+  user-select: none;
+}
+
 .pageJump::placeholder {
     color: color-mix(in srgb, var(--gold) 55%, transparent);
 }

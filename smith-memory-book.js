@@ -127,6 +127,17 @@ console.log("✅ main script started");
         wrap.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
     }
 
+    function syncPageIndicator(humanPage) {
+        const pageJump = $("pageJump");
+        const pageTotal = $("pageTotal");
+        if (pageTotal) pageTotal.textContent = `/${TOTAL_PAGES}`;
+
+        // Don’t fight the user while they’re typing
+        if (pageJump && document.activeElement !== pageJump) {
+            pageJump.value = String(humanPage);
+        }
+    }
+
     function updatePanCursor() {
         const wrap = $("flipbook-wrap");
         if (!wrap) return;
@@ -230,6 +241,9 @@ console.log("✅ main script started");
         applyTransform();
         updatePanCursor();
 
+        const storedHuman = Number(localStorage.getItem("flip:page") || "1");
+        syncPageIndicator(Math.max(1, Math.min(TOTAL_PAGES, storedHuman)));
+
         const wrap = $("flipbook-wrap");
 
         if (wrap) {
@@ -267,11 +281,15 @@ console.log("✅ main script started");
         const pageJump = $("pageJump");
         pageJump?.addEventListener("keydown", (e) => {
             if (e.key !== "Enter") return;
+
             const n = parseInt(e.currentTarget.value, 10);
-            if (Number.isFinite(n))
-                window.__flipbook.pageFlip.flip(
-                    Math.max(1, Math.min(TOTAL_PAGES, n)) - 1
-                );
+            if (Number.isFinite(n)) {
+                const clamped = Math.max(1, Math.min(TOTAL_PAGES, n));
+                window.__flipbook.pageFlip.flip(clamped - 1);
+                localStorage.setItem("flip:page", String(clamped));
+                syncPageIndicator(clamped);
+            }
+
             e.currentTarget.blur();
         });
 
@@ -407,11 +425,13 @@ console.log("✅ main script started");
         const desiredIndex = Math.max(0, Math.min(TOTAL_PAGES - 1, desiredHuman - 1));
 
         pageFlip.flip(desiredIndex);
+        syncPageIndicator(desiredIndex + 1);
 
         pageFlip.on("flip", (e) => {
             playRandomTurn();
             const human = (e.data ?? e) + 1;
             localStorage.setItem("flip:page", String(human));
+            syncPageIndicator(human);
         });
 
         setTimeout(wireUI, 50);
