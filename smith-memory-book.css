@@ -146,8 +146,8 @@ input {
 
 .pageJump {
     font-family: var(--ui-font);
-    font-size: 18px;
-    font-weight: 700;
+    font-size: 16px;
+    font-weight: 600;
     width: 64px;
     height: 38px;
     border-radius: 999px;

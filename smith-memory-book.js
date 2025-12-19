@@ -107,6 +107,15 @@ console.log("✅ main script started");
         });
     }
 
+    function formatPageValue(n) {
+        return `${n} of ${TOTAL_PAGES}`;
+    }
+
+    function extractPageNumber(value) {
+        const match = value.match(/\d+/);
+        return match ? parseInt(match[0], 10) : NaN;
+    }
+
     function applyStage() {
         if (!stageEl) return;
         const stageVar =
@@ -129,12 +138,10 @@ console.log("✅ main script started");
 
     function syncPageIndicator(humanPage) {
         const pageJump = $("pageJump");
-        const pageTotal = $("pageTotal");
-        if (pageTotal) pageTotal.textContent = `/${TOTAL_PAGES}`;
+        if (!pageJump) return;
 
-        // Don’t fight the user while they’re typing
-        if (pageJump && document.activeElement !== pageJump) {
-            pageJump.value = String(humanPage);
+        if (document.activeElement !== pageJump) {
+            pageJump.value = formatPageValue(humanPage);
         }
     }
 
@@ -241,9 +248,6 @@ console.log("✅ main script started");
         applyTransform();
         updatePanCursor();
 
-        const storedHuman = Number(localStorage.getItem("flip:page") || "1");
-        syncPageIndicator(Math.max(1, Math.min(TOTAL_PAGES, storedHuman)));
-
         const wrap = $("flipbook-wrap");
 
         if (wrap) {
@@ -279,17 +283,32 @@ console.log("✅ main script started");
         $("btnNext") && ($("btnNext").onclick = () => window.__flipbook.pageFlip.flipNext());
 
         const pageJump = $("pageJump");
+
+        pageJump?.addEventListener("focus", () => {
+            const n = extractPageNumber(pageJump.value);
+            if (Number.isFinite(n)) pageJump.value = String(n);
+        });
+
+        pageJump?.addEventListener("blur", () => {
+            const n = extractPageNumber(pageJump.value);
+            const clamped = Number.isFinite(n)
+                ? Math.max(1, Math.min(TOTAL_PAGES, n))
+                : Number(localStorage.getItem("flip:page") || 1);
+
+            pageJump.value = formatPageValue(clamped);
+        });
+
         pageJump?.addEventListener("keydown", (e) => {
             if (e.key !== "Enter") return;
 
-            const n = parseInt(e.currentTarget.value, 10);
-            if (Number.isFinite(n)) {
-                const clamped = Math.max(1, Math.min(TOTAL_PAGES, n));
-                window.__flipbook.pageFlip.flip(clamped - 1);
-                localStorage.setItem("flip:page", String(clamped));
-                syncPageIndicator(clamped);
-            }
+            const n = extractPageNumber(e.currentTarget.value);
+            if (!Number.isFinite(n)) return;
 
+            const clamped = Math.max(1, Math.min(TOTAL_PAGES, n));
+            window.__flipbook.pageFlip.flip(clamped - 1);
+            localStorage.setItem("flip:page", String(clamped));
+
+            syncPageIndicator(clamped);
             e.currentTarget.blur();
         });
 
