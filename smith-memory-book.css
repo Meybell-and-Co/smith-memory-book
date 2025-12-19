@@ -449,7 +449,7 @@ body.is-reading #flipbook-wrap {
 /* --- Start hint GIF overlay --- */
 #startHint {
   position: absolute;
-  z-index: 900;
+  z-index: 9999;
   pointer-events: none;
 
   inset: auto;
