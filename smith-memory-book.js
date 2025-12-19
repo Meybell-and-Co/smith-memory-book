@@ -513,19 +513,18 @@ console.log("✅ main script started");
             const page = document.createElement("div");
             page.className = "page";
 
-            // Covers: first + last only
+            // 👻 ghost page
+            if (!src) {
+                page.classList.add("page-ghost");
+                container.appendChild(page);
+                return;
+            }
+            // 📕 covers: first + last real pages only
             if (i === 0 || i === pages.length - 1) {
                 page.setAttribute("data-density", "hard");
                 page.classList.add("page-cover");
                 if (i === 0) page.classList.add("page-cover-top");
                 else page.classList.add("page-cover-bottom");
-            }
-
-            // ✅ Ghost spacer page (src is null)
-            if (!src) {
-                page.classList.add("page-ghost");
-                container.appendChild(page);
-                return;
             }
 
             // Normal page with image
@@ -538,30 +537,30 @@ console.log("✅ main script started");
             container.appendChild(page);
         });
 
-        pageFlip.loadFromHTML(container.querySelectorAll(".page"));
-        window.__flipbook = { pageFlip };
+    pageFlip.loadFromHTML(container.querySelectorAll(".page"));
+    window.__flipbook = { pageFlip };
 
 
-        // choose start page: hash beats localStorage beats 1
-        const m = location.hash.match(/p=(\d+)/);
-        const hashHuman = m ? Number(m[1]) : null;
-        const storedHuman = Number(localStorage.getItem("flip:page") || "1");
-        const desiredHuman = Number.isFinite(hashHuman) ? hashHuman : storedHuman;
-        const desiredIndex = Math.max(0, Math.min(TOTAL_PAGES - 1, desiredHuman - 1));
+    // choose start page: hash beats localStorage beats 1
+    const m = location.hash.match(/p=(\d+)/);
+    const hashHuman = m ? Number(m[1]) : null;
+    const storedHuman = Number(localStorage.getItem("flip:page") || "1");
+    const desiredHuman = Number.isFinite(hashHuman) ? hashHuman : storedHuman;
+    const desiredIndex = Math.max(0, Math.min(TOTAL_PAGES - 1, desiredHuman - 1));
 
-        pageFlip.flip(desiredIndex);
-        syncPageIndicator(desiredIndex + 1);
+    pageFlip.flip(desiredIndex);
+    syncPageIndicator(desiredIndex + 1);
 
-        pageFlip.on("flip", (e) => {
-            playRandomTurn();
-            const human = (e.data ?? e) + 1;
-            localStorage.setItem("flip:page", String(human));
-            syncPageIndicator(human);
-        });
+    pageFlip.on("flip", (e) => {
+        playRandomTurn();
+        const human = (e.data ?? e) + 1;
+        localStorage.setItem("flip:page", String(human));
+        syncPageIndicator(human);
+    });
 
-        setTimeout(wireUI, 50);
-        return true;
-    }
+    setTimeout(wireUI, 50);
+    return true;
+}
 
     let tries = 0;
     const t = setInterval(() => {

@@ -322,13 +322,24 @@ input {
 }
 
 /* 👻
+/* Ghost spacer pages — fully inert */
 .page.page-ghost{
   background: transparent !important;
   box-shadow: none !important;
   border: 0 !important;
+
+  /* kill geometry */
+  width: 0 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+
+  /* kill interaction */
+  pointer-events: none !important;
 }
 
-.page.page-ghost .page-content,
-.page.page-ghost .page-image{
+/* nuke all inner rendering */
+.page.page-ghost *,
+.page.page-ghost::before,
+.page.page-ghost::after{
   display: none !important;
 }
