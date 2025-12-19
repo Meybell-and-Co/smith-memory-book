@@ -67,8 +67,8 @@ input {
 }
 
 #flipbook-wrap {
-  --cursor-open: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/flipbook-ui-icons/grab-open-gold.png");
-  --cursor-closed: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/flipbook-ui-icons/grab-closed-gold.png");
+--cursor-open: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/flipbook-ui-icons/grab-open-gold.png?v=2");
+--cursor-closed: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/flipbook-ui-icons/grab-closed-gold.png?v=2");
 }
 
 #flipbook-wrap::before {
