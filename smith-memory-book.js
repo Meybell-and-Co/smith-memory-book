@@ -1,6 +1,6 @@
 (function () {
   console.log("✅ main script started");
-  console.log("🔥 SMB MAIN JS v2025-12-18 12:xx — clean + safe wiring");
+  console.log("🔥 SMB MAIN JS v2025-12-18 — clean + safe wiring");
 
   // ---- App namespace (ONE global, intentionally) ----
   window.SMB = window.SMB || {};
@@ -149,9 +149,10 @@
   }
 
   function getPF() {
-    return SMB.flipbook?.pageFlip;
+    return SMB.flipbook || null; // we store the instance directly
   }
 
+  // ---- UI wiring (safe to run before PF exists) ----
   let uiWired = false;
   function wireUI() {
     if (uiWired) return;
@@ -160,7 +161,6 @@
     paintIcons();
     applyStage();
 
-    // Buttons
     const btnFirst = $("btnFirst");
     const btnLast = $("btnLast");
     const btnPrev = $("btnPrev");
@@ -171,7 +171,6 @@
     btnPrev && (btnPrev.onclick = () => getPF()?.flipPrev());
     btnNext && (btnNext.onclick = () => getPF()?.flipNext());
 
-    // Page jump
     const pageJump = $("pageJump");
     pageJump?.addEventListener("keydown", (e) => {
       if (e.key !== "Enter") return;
@@ -182,7 +181,6 @@
       getPF()?.flip(PageMap.humanToFlipIndex(safeHuman));
     });
 
-    // quick sanity table
     console.table(
       [1, 2, 3, 4, 5].map((h) => ({
         human: h,
@@ -192,14 +190,35 @@
     );
   }
 
+  // ---- Flipbook fill fixes ----
+  function SMB_forceFlipbookFill(el) {
+    if (!el) return;
+    const wrapper = el.querySelector(".stf__wrapper");
+    if (!wrapper) return;
+
+    // kill vendor aspect-ratio padding trick and force full height
+    wrapper.style.paddingBottom = "0px";
+    wrapper.style.height = "100%";
+  }
+
+  function SMB_forceFlipbookFillBurst(el) {
+    SMB_forceFlipbookFill(el);
+    requestAnimationFrame(() => SMB_forceFlipbookFill(el));
+    setTimeout(() => SMB_forceFlipbookFill(el), 0);
+    setTimeout(() => SMB_forceFlipbookFill(el), 50);
+    setTimeout(() => SMB_forceFlipbookFill(el), 150);
+  }
+
+  // ---- Init PageFlip (safe) ----
   function init() {
     const el = document.getElementById("flipbook");
     if (!el) return false;
+
     if (!window.St || typeof window.St.PageFlip !== "function") return false;
+
+    // prevent double init
     if (el.dataset.flipInit === "1") return true;
 
-    el.dataset.flipInit = "1";
-        
     const pageFlip = new St.PageFlip(el, {
       width: 2000,
       height: 1680,
@@ -213,49 +232,38 @@
       mobileScrollSupport: true,
     });
 
+    // load pages FIRST (if this throws, we don't poison flipInit)
     pageFlip.loadFromImages(buildPages());
-    SMB.flipbook = { pageFlip };
-    
-function SMB_forceFlipbookFill() {
-  const wrapper = el.querySelector(".stf__wrapper");
-  if (!wrapper) return;
-  wrapper.style.paddingBottom = "0px";
-  wrapper.style.height = "100%";
-}
 
-function SMB_forceFlipbookFillBurst() {
-  SMB_forceFlipbookFill();
-  requestAnimationFrame(SMB_forceFlipbookFill);
-  setTimeout(SMB_forceFlipbookFill, 0);
-  setTimeout(SMB_forceFlipbookFill, 50);
-  setTimeout(SMB_forceFlipbookFill, 150);
-}
+    // mark initialized only after successful load
+    el.dataset.flipInit = "1";
 
-SMB_forceFlipbookFillBurst();
+    // store instance directly
+    SMB.flipbook = pageFlip;
 
-window.addEventListener("resize", SMB_forceFlipbookFillBurst);
-pageFlip.on("init", SMB_forceFlipbookFillBurst);
-pageFlip.on("changeOrientation", SMB_forceFlipbookFillBurst);
+    // try to force transparent clear (canvas renderer)
+    const render = pageFlip.getRender?.();
+    if (render && render.ctx && render.canvas) {
+      render.clear = function () {
+        // transparent clear
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      };
+    }
 
-pageFlip.on("flip", () => playRandomTurn());
-wireUI();    
+    // force-fill now + on resize/orientation events
+    SMB_forceFlipbookFillBurst(el);
+    window.addEventListener("resize", () => SMB_forceFlipbookFillBurst(el));
+    pageFlip.on("init", () => SMB_forceFlipbookFillBurst(el));
+    pageFlip.on("changeOrientation", () => SMB_forceFlipbookFillBurst(el));
 
-return true;
-  }
-    
-SMB_forceFlipbookFill();
-window.addEventListener("resize", SMB_forceFlipbookFill);
-requestAnimationFrame(SMB_forceFlipbookFill);
-    
+    // sounds + UI
     pageFlip.on("flip", () => playRandomTurn());
-
-    // Now that PF exists, ensure UI is wired
     wireUI();
 
     return true;
   }
 
-  // Wire UI once DOM exists (safe even before PF exists)
+  // Wire UI once DOM exists
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", wireUI, { once: true });
   } else {
