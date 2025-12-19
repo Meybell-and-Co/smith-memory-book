@@ -439,11 +439,33 @@ console.log("✅ main script started");
         pageFlip.loadFromHTML(els.book.querySelectorAll(".page"));
         window.__flipbook = { pageFlip };
 
-        // Flip event -> sync storage + indicator + locks
+        let isSnapBack = false;
+
+        let lastHuman = Number(localStorage.getItem("flip:page") || "3");
+
         pageFlip.on("flip", (e) => {
+            if (isSnapBack) return;
+
             playRandomTurn();
+
             const idx = e?.data ?? e;
             const human = idxToHuman(idx);
+
+            if (lastHuman === 3 && human < 3) {
+                isSnapBack = true;
+                setTimeout(() => {
+                    pageFlip.flip(humanToIdx(3));
+                    localStorage.setItem("flip:page", "3");
+                    syncPageIndicator(3);
+                    updateNavLocks(3);
+                    isSnapBack = false;
+                }, 0);
+
+                lastHuman = 3;
+                return;
+            }
+
+            lastHuman = human;
             localStorage.setItem("flip:page", String(human));
             syncPageIndicator(human);
             updateNavLocks(human);
