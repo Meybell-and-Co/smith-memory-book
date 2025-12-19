@@ -50,7 +50,7 @@ button, input{
 #flipbook-stage .stf__block,
 #flipbook-stage canvas.stf__canvas {
   height: 100% !important;
-  height: 100% !important;
+  width: 100% !important;
 }
 
 .stf__canvas,
@@ -68,6 +68,7 @@ canvas {
 #flipbook canvas.stf__canvas {
   background: transparent !important;
   height: 100% !important;
+  width: 100% !important;
 }
 
 /* Decorative book frame overlay */
