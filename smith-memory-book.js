@@ -216,14 +216,14 @@
       tilesBuilt = true;
     }
 
-    tiles.classList.add("open");
+    tiles.classList.add("is-open");
     try { SFX.tiles.currentTime = 0; SFX.tiles.play().catch(() => {}); } catch (_) {}
   }
 
   function closeTiles() {
     const tiles = $("tiles");
     if (!tiles) return;
-    tiles.classList.remove("open");
+    tiles.classList.remove("is-open");
   }
 
   function buildTilesGrid() {
@@ -276,7 +276,7 @@
   function toggleMore() {
     const m = $("moreMenu");
     if (!m) return;
-    setMoreOpen(!m.classList.contains("open"));
+    setMoreOpen(!m.classList.contains("is-open"));
   }
 
   function buildStageMenu() {
@@ -373,7 +373,7 @@
       const m = $("moreMenu");
       const btn = $("btnMore");
       if (!m || !btn) return;
-      if (!m.classList.contains("open")) return;
+      if (!m.classList.contains("is-open")) return;
       if (m.contains(e.target) || btn.contains(e.target)) return;
       setMoreOpen(false);
     });
@@ -490,8 +490,7 @@
       pageFlip.loadFromImages(buildPages());
       SMB.flipbook = pageFlip;
 
-      pageFlip.on("flip", () => playRandomTurn());
-      pageFlip.on("init", () => safeUpdatePF(pageFlip, w, h));
+            pageFlip.on("init", () => safeUpdatePF(pageFlip, w, h));
       pageFlip.on("changeOrientation", () => safeUpdatePF(pageFlip, w, h));
 
       wireUI();
