@@ -100,438 +100,449 @@ console.log("✅ main script started");
         return `${BASE}lembo_${n}.webp`;
     }
 
-    function buildPages() {
-        return Array.from({ length: TOTAL_PAGES }, (_, idx) => pageUrl(idx + 1));
-    }
+function buildPages() {
+  // TOTAL_PAGES should be 239 in your case
 
+  const pages = [];
+
+  pages.push(urlFor("lembo_0001.webp"));
+
+  for (let p = 2; p <= TOTAL_PAGES - 1; p++) {
+    pages.push(pageUrl(p));
+  }
+
+  pages.push(urlFor("lembo_0239.webp"));
+
+  return pages;
+}
     function paintIcons() {
-        document.querySelectorAll("#flipbar img[data-ikey]").forEach((img) => {
-            const key = img.dataset.ikey;
-            if (key === "sound") img.src = soundOn ? ICONS.soundOn : ICONS.soundOff;
-            else img.src = ICONS[key] || "";
-        });
+    document.querySelectorAll("#flipbar img[data-ikey]").forEach((img) => {
+        const key = img.dataset.ikey;
+        if (key === "sound") img.src = soundOn ? ICONS.soundOn : ICONS.soundOff;
+        else img.src = ICONS[key] || "";
+    });
+}
+
+function formatPageValue(n) {
+    return `${n} of ${TOTAL_PAGES}`;
+}
+
+function extractPageNumber(value) {
+    const match = value.match(/\d+/);
+    return match ? parseInt(match[0], 10) : NaN;
+}
+
+function applyStage() {
+    if (!stageEl) return;
+    const stageVar =
+        {
+            table: "var(--stage-table)",
+            parquet: "var(--stage-parquet)",
+            kitchen: "var(--stage-kitchen)",
+            basement: "var(--stage-basement)",
+            lawn: "var(--stage-lawn)",
+            cancun: "var(--stage-cancun)",
+        }[stageKey] || "var(--stage-table)";
+    stageEl.style.setProperty("--stage-img", stageVar);
+}
+
+function applyTransform() {
+    const wrap = $("flipbook-wrap");
+    if (!wrap) return;
+    wrap.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+}
+
+function syncPageIndicator(humanPage) {
+    const pageJump = $("pageJump");
+    if (!pageJump) return;
+
+    if (document.activeElement !== pageJump) {
+        pageJump.value = formatPageValue(humanPage);
     }
+}
 
-    function formatPageValue(n) {
-        return `${n} of ${TOTAL_PAGES}`;
-    }
+function updatePanCursor() {
+    const wrap = $("flipbook-wrap");
+    if (!wrap) return;
+    wrap.classList.toggle("can-pan", zoom > 1);
+}
 
-    function extractPageNumber(value) {
-        const match = value.match(/\d+/);
-        return match ? parseInt(match[0], 10) : NaN;
-    }
+function setZoom(z) {
+    zoom = Math.max(0.6, Math.min(2.2, z));
+    localStorage.setItem("flip:zoom", String(zoom));
+    applyTransform();
+    updatePanCursor();
+}
 
-    function applyStage() {
-        if (!stageEl) return;
-        const stageVar =
-            {
-                table: "var(--stage-table)",
-                parquet: "var(--stage-parquet)",
-                kitchen: "var(--stage-kitchen)",
-                basement: "var(--stage-basement)",
-                lawn: "var(--stage-lawn)",
-                cancun: "var(--stage-cancun)",
-            }[stageKey] || "var(--stage-table)";
-        stageEl.style.setProperty("--stage-img", stageVar);
-    }
+function shareLink() {
+    const url = new URL(location.href);
+    url.hash = `p=${Number(localStorage.getItem("flip:page") || "1")}`;
+    return url.toString();
+}
 
-    function applyTransform() {
-        const wrap = $("flipbook-wrap");
-        if (!wrap) return;
-        wrap.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
-    }
+function doShare() {
+    const link = shareLink();
+    if (navigator.share)
+        navigator.share({ title: document.title, url: link }).catch(() => { });
+    else
+        navigator.clipboard
+            ?.writeText(link)
+            .then(() => alert("Link copied!"))
+            .catch(() => prompt("Copy this link:", link));
+}
 
-    function syncPageIndicator(humanPage) {
-        const pageJump = $("pageJump");
-        if (!pageJump) return;
+function doPrintCurrent() {
+    const page = Number(localStorage.getItem("flip:page") || "1");
+    const imgSrc = pageUrl(page);
 
-        if (document.activeElement !== pageJump) {
-            pageJump.value = formatPageValue(humanPage);
-        }
-    }
+    const w = window.open("", "_blank");
+    if (!w) return;
 
-    function updatePanCursor() {
-        const wrap = $("flipbook-wrap");
-        if (!wrap) return;
-        wrap.classList.toggle("can-pan", zoom > 1);
-    }
+    w.document.open();
+    w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8">');
+    w.document.write("<title>Print page " + page + "</title>");
+    w.document.write(
+        "<style>" +
+        "body{margin:0;display:flex;justify-content:center;align-items:center;}" +
+        "img{max-width:100vw;max-height:100vh;}" +
+        "</style>"
+    );
+    w.document.write("</head><body>");
+    w.document.write(
+        '<img id="printImg" src="' +
+        imgSrc +
+        '" alt="Page ' +
+        page +
+        '">'
+    );
+    w.document.write("</body></html>");
+    w.document.close();
 
-    function setZoom(z) {
-        zoom = Math.max(0.6, Math.min(2.2, z));
-        localStorage.setItem("flip:zoom", String(zoom));
-        applyTransform();
-        updatePanCursor();
-    }
+    w.onload = () => {
+        const img = w.document.getElementById("printImg");
+        if (!img) return;
 
-    function shareLink() {
-        const url = new URL(location.href);
-        url.hash = `p=${Number(localStorage.getItem("flip:page") || "1")}`;
-        return url.toString();
-    }
-
-    function doShare() {
-        const link = shareLink();
-        if (navigator.share)
-            navigator.share({ title: document.title, url: link }).catch(() => { });
-        else
-            navigator.clipboard
-                ?.writeText(link)
-                .then(() => alert("Link copied!"))
-                .catch(() => prompt("Copy this link:", link));
-    }
-
-    function doPrintCurrent() {
-        const page = Number(localStorage.getItem("flip:page") || "1");
-        const imgSrc = pageUrl(page);
-
-        const w = window.open("", "_blank");
-        if (!w) return;
-
-        w.document.open();
-        w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8">');
-        w.document.write("<title>Print page " + page + "</title>");
-        w.document.write(
-            "<style>" +
-            "body{margin:0;display:flex;justify-content:center;align-items:center;}" +
-            "img{max-width:100vw;max-height:100vh;}" +
-            "</style>"
-        );
-        w.document.write("</head><body>");
-        w.document.write(
-            '<img id="printImg" src="' +
-            imgSrc +
-            '" alt="Page ' +
-            page +
-            '">'
-        );
-        w.document.write("</body></html>");
-        w.document.close();
-
-        w.onload = () => {
-            const img = w.document.getElementById("printImg");
-            if (!img) return;
-
-            img.onload = () => {
-                w.focus();
-                w.print();
-                setTimeout(() => w.close(), 250);
-            };
-
-            if (img.complete) img.onload();
+        img.onload = () => {
+            w.focus();
+            w.print();
+            setTimeout(() => w.close(), 250);
         };
-    }
 
-    let tilesBuilt = false;
-    function buildTilesOnce() {
-        if (tilesBuilt) return;
-        const grid = $("tilesGrid");
-        if (!grid) return;
+        if (img.complete) img.onload();
+    };
+}
 
-        const frag = document.createDocumentFragment();
-        for (let p = 1; p <= TOTAL_PAGES; p++) {
-            const d = document.createElement("div");
-            d.className = "tile";
-            d.innerHTML = `<img loading="lazy" src="${pageUrl(
-                p
-            )}" alt="Page ${p}">
+let tilesBuilt = false;
+function buildTilesOnce() {
+    if (tilesBuilt) return;
+    const grid = $("tilesGrid");
+    if (!grid) return;
+
+    const frag = document.createDocumentFragment();
+    for (let p = 1; p <= TOTAL_PAGES; p++) {
+        const d = document.createElement("div");
+        d.className = "tile";
+        d.innerHTML = `<img loading="lazy" src="${pageUrl(
+            p
+        )}" alt="Page ${p}">
         <div class="n"><span>Page</span><strong>${p}</strong></div>`;
 
-            d.addEventListener("click", () => {
-                window.__flipbook?.pageFlip?.flip(p - 1);
-                $("tiles")?.classList.remove("is-open");
-            });
+        d.addEventListener("click", () => {
+            window.__flipbook?.pageFlip?.flip(p - 1);
+            $("tiles")?.classList.remove("is-open");
+        });
 
-            frag.appendChild(d);
-        }
-        grid.appendChild(frag);
-        tilesBuilt = true;
+        frag.appendChild(d);
+    }
+    grid.appendChild(frag);
+    tilesBuilt = true;
+}
+
+function wireUI() {
+    paintIcons();
+    applyStage();
+    applyTransform();
+    updatePanCursor();
+
+    const wrap = $("flipbook-wrap");
+
+    if (wrap) {
+        wrap.addEventListener("pointerdown", (e) => {
+            if (zoom <= 1) return;
+            isPanning = true;
+            wrap.classList.add("is-dragging");
+            console.log("drag start", wrap.className);
+            wrap.setPointerCapture(e.pointerId);
+            panSX = e.clientX;
+            panSY = e.clientY;
+            panOX = panX;
+            panOY = panY;
+        });
+
+        wrap.addEventListener("pointermove", (e) => {
+            if (!isPanning) return;
+            panX = panOX + (e.clientX - panSX);
+            panY = panOY + (e.clientY - panSY);
+            applyTransform();
+        });
+
+        wrap.addEventListener("pointerup", () => {
+            isPanning = false;
+            wrap.classList.remove("is-dragging");
+            console.log("drag end", wrap.className);
+        });
+
+        wrap.addEventListener("pointerleave", () => {
+            isPanning = false;
+            wrap.classList.remove("is-dragging");
+        });
+        wrap.addEventListener("pointercancel", () => {
+            isPanning = false;
+            wrap.classList.remove("is-dragging");
+        });
     }
 
-    function wireUI() {
-        paintIcons();
-        applyStage();
-        applyTransform();
-        updatePanCursor();
+    $("btnFirst") && ($("btnFirst").onclick = () => window.__flipbook.pageFlip.flip(0));
+    $("btnLast") && ($("btnLast").onclick = () => window.__flipbook.pageFlip.flip(TOTAL_PAGES - 1));
+    $("btnPrev") && ($("btnPrev").onclick = () => window.__flipbook.pageFlip.flipPrev());
+    $("btnNext") && ($("btnNext").onclick = () => window.__flipbook.pageFlip.flipNext());
 
+    const pageJump = $("pageJump");
+
+    pageJump?.addEventListener("focus", () => {
+        const n = extractPageNumber(pageJump.value);
+        if (Number.isFinite(n)) pageJump.value = String(n);
+    });
+
+    pageJump?.addEventListener("blur", () => {
+        const n = extractPageNumber(pageJump.value);
+        const clamped = Number.isFinite(n)
+            ? Math.max(1, Math.min(TOTAL_PAGES, n))
+            : Number(localStorage.getItem("flip:page") || 1);
+
+        pageJump.value = formatPageValue(clamped);
+    });
+
+    pageJump?.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter") return;
+
+        const n = extractPageNumber(e.currentTarget.value);
+        if (!Number.isFinite(n)) return;
+
+        const clamped = Math.max(1, Math.min(TOTAL_PAGES, n));
+        window.__flipbook.pageFlip.flip(clamped - 1);
+        localStorage.setItem("flip:page", String(clamped));
+
+        syncPageIndicator(clamped);
+        e.currentTarget.blur();
+    });
+
+    $("zoomIn") && ($("zoomIn").onclick = () => setZoom(zoom + 0.1));
+    $("zoomOut") && ($("zoomOut").onclick = () => setZoom(zoom - 0.1));
+
+    function centerBookVertically() {
         const wrap = $("flipbook-wrap");
+        const book = $("flipbook");
+        if (!wrap || !book) return;
 
-        if (wrap) {
-            wrap.addEventListener("pointerdown", (e) => {
-                if (zoom <= 1) return;
-                isPanning = true;
-                wrap.classList.add("is-dragging");
-                console.log("drag start", wrap.className);
-                wrap.setPointerCapture(e.pointerId);
-                panSX = e.clientX;
-                panSY = e.clientY;
-                panOX = panX;
-                panOY = panY;
-            });
+        const wrapRect = wrap.getBoundingClientRect();
+        const bookRect = book.getBoundingClientRect();
 
-            wrap.addEventListener("pointermove", (e) => {
-                if (!isPanning) return;
-                panX = panOX + (e.clientX - panSX);
-                panY = panOY + (e.clientY - panSY);
-                applyTransform();
-            });
-
-            wrap.addEventListener("pointerup", () => {
-                isPanning = false;
-                wrap.classList.remove("is-dragging");
-                console.log("drag end", wrap.className);
-            });
-
-            wrap.addEventListener("pointerleave", () => {
-                isPanning = false;
-                wrap.classList.remove("is-dragging");
-            });
-            wrap.addEventListener("pointercancel", () => {
-                isPanning = false;
-                wrap.classList.remove("is-dragging");
-            });
-        }
-
-        $("btnFirst") && ($("btnFirst").onclick = () => window.__flipbook.pageFlip.flip(0));
-        $("btnLast") && ($("btnLast").onclick = () => window.__flipbook.pageFlip.flip(TOTAL_PAGES - 1));
-        $("btnPrev") && ($("btnPrev").onclick = () => window.__flipbook.pageFlip.flipPrev());
-        $("btnNext") && ($("btnNext").onclick = () => window.__flipbook.pageFlip.flipNext());
-
-        const pageJump = $("pageJump");
-
-        pageJump?.addEventListener("focus", () => {
-            const n = extractPageNumber(pageJump.value);
-            if (Number.isFinite(n)) pageJump.value = String(n);
-        });
-
-        pageJump?.addEventListener("blur", () => {
-            const n = extractPageNumber(pageJump.value);
-            const clamped = Number.isFinite(n)
-                ? Math.max(1, Math.min(TOTAL_PAGES, n))
-                : Number(localStorage.getItem("flip:page") || 1);
-
-            pageJump.value = formatPageValue(clamped);
-        });
-
-        pageJump?.addEventListener("keydown", (e) => {
-            if (e.key !== "Enter") return;
-
-            const n = extractPageNumber(e.currentTarget.value);
-            if (!Number.isFinite(n)) return;
-
-            const clamped = Math.max(1, Math.min(TOTAL_PAGES, n));
-            window.__flipbook.pageFlip.flip(clamped - 1);
-            localStorage.setItem("flip:page", String(clamped));
-
-            syncPageIndicator(clamped);
-            e.currentTarget.blur();
-        });
-
-        $("zoomIn") && ($("zoomIn").onclick = () => setZoom(zoom + 0.1));
-        $("zoomOut") && ($("zoomOut").onclick = () => setZoom(zoom - 0.1));
-
-        function centerBookVertically() {
-            const wrap = $("flipbook-wrap");
-            const book = $("flipbook");
-            if (!wrap || !book) return;
-
-            const wrapRect = wrap.getBoundingClientRect();
-            const bookRect = book.getBoundingClientRect();
-
-            panY = Math.round((wrapRect.height - bookRect.height) / 2);
-        }
-
-        function resetViewToComfort() {
-            zoom = DEFAULT_ZOOM;
-            setZoom(zoom);
-
-            panX = 0;
-            centerBookVertically();
-
-            panY += OPTICAL_NUDGE_Y;
-
-            if (typeof applyPan === "function") applyPan();
-        }
-
-        $("zoomReset") && (
-            $("zoomReset").onclick = () => {
-                console.log("🔄 Reset view");
-                resetViewToComfort();
-            }
-        );
-
-        $("btnTiles") &&
-            ($("btnTiles").onclick = () => {
-                $("tiles")?.classList.toggle("is-open");
-                buildTilesOnce();
-            });
-
-        $("tilesClose") &&
-            ($("tilesClose").onclick = () => $("tiles")?.classList.remove("is-open"));
-
-        $("btnMore") &&
-            ($("btnMore").onclick = () => $("moreMenu")?.classList.toggle("is-open"));
-
-        document.addEventListener("click", (e) => {
-            if (!e.target.closest("#btnMore") && !e.target.closest("#moreMenu")) {
-                $("moreMenu")?.classList.remove("is-open");
-            }
-        });
-
-        $("btnShare") && ($("btnShare").onclick = doShare);
-        $("btnPrint") && ($("btnPrint").onclick = doPrintCurrent);
-
-        $("btnFull") &&
-            ($("btnFull").onclick = () => {
-                const stage = $("flipbook-stage");
-                if (!stage) return;
-                if (!document.fullscreenElement) stage.requestFullscreen?.();
-                else document.exitFullscreen?.();
-            });
-
-        $("btnSearch") && ($("btnSearch").onclick = () => alert("Search UI next step 😈"));
-
-        $("btnSound") &&
-            ($("btnSound").onclick = () => {
-                soundOn = !soundOn;
-                localStorage.setItem("flip:sound", soundOn ? "1" : "0");
-                paintIcons();
-                (soundOn ? SFX.soundOn : SFX.soundOff).play().catch(() => { });
-            });
-
-        // Stage menu wiring (optional; safe if markup not present yet)
-        const stageMenu = $("stageMenu");
-        const btnStage = $("btnStage");
-
-        function renderStageMenu() {
-            if (!stageMenu) return;
-            stageMenu.innerHTML = STAGES.map(
-                ([k, label]) =>
-                    `<button type="button" data-stage="${k}">${k === stageKey ? "■" : "□"} ${label}</button>`
-            ).join("");
-        }
-
-        if (btnStage && stageMenu) {
-            renderStageMenu();
-
-            btnStage.onclick = () => {
-                playSfx("click");
-                stageMenu.classList.toggle("is-open");
-            };
-
-            stageMenu.addEventListener("click", (e) => {
-                const btn = e.target.closest("button[data-stage]");
-                if (!btn) return;
-                stageKey = btn.dataset.stage;
-                localStorage.setItem("flip:stage", stageKey);
-                applyStage();
-                renderStageMenu();
-            });
-        }
-
-        // Button SFX
-        function wireButtonSfx(...ids) {
-            ids.forEach((id) => {
-                const el = $(id);
-                if (!el) return;
-                el.addEventListener("pointerenter", () => playSfx("hover"));
-                el.addEventListener("click", () => playSfx("click"));
-            });
-        }
-
-        wireButtonSfx(
-            "btnFirst",
-            "btnPrev",
-            "btnNext",
-            "btnLast",
-            "zoomOut",
-            "zoomIn",
-            "btnTiles",
-            "btnMore",
-            "btnShare",
-            "btnPrint",
-            "btnFull",
-            "btnSearch",
-            "btnSound",
-            "btnStage"
-        );
+        panY = Math.round((wrapRect.height - bookRect.height) / 2);
     }
 
-    function init() {
-        const el = $("flipbook");
-        if (!el) return false;
-        if (!window.St?.PageFlip) return false;
-        if (el.dataset.flipInit === "1") return true;
-        el.dataset.flipInit = "1";
+    function resetViewToComfort() {
+        zoom = DEFAULT_ZOOM;
+        setZoom(zoom);
 
-        const pageFlip = new window.St.PageFlip(el, {
-            width: 2000,
-            height: 1680,
-            size: "stretch",
-            minWidth: 320,
-            maxWidth: 2000,
-            minHeight: 400,
-            maxHeight: 1680,
-            maxShadowOpacity: 0.18,
-            showCover: true,
-            mobileScrollSupport: true,
+        panX = 0;
+        centerBookVertically();
+
+        panY += OPTICAL_NUDGE_Y;
+
+        if (typeof applyPan === "function") applyPan();
+    }
+
+    $("zoomReset") && (
+        $("zoomReset").onclick = () => {
+            console.log("🔄 Reset view");
+            resetViewToComfort();
+        }
+    );
+
+    $("btnTiles") &&
+        ($("btnTiles").onclick = () => {
+            $("tiles")?.classList.toggle("is-open");
+            buildTilesOnce();
         });
 
-        const pages = buildPages();
+    $("tilesClose") &&
+        ($("tilesClose").onclick = () => $("tiles")?.classList.remove("is-open"));
 
-        const container = document.getElementById("flipbook");
-        if (!container) { console.error("❌ #flipbook not found"); return false; }
+    $("btnMore") &&
+        ($("btnMore").onclick = () => $("moreMenu")?.classList.toggle("is-open"));
 
-        container.innerHTML = "";
+    document.addEventListener("click", (e) => {
+        if (!e.target.closest("#btnMore") && !e.target.closest("#moreMenu")) {
+            $("moreMenu")?.classList.remove("is-open");
+        }
+    });
 
-        pages.forEach((src, i) => {
-            const page = document.createElement("div");
-            page.className = "page";
+    $("btnShare") && ($("btnShare").onclick = doShare);
+    $("btnPrint") && ($("btnPrint").onclick = doPrintCurrent);
 
-            if (i === 0 || i === pages.length - 1) {
-                page.setAttribute("data-density", "hard");
-                page.classList.add("page-cover");
-                if (i === 0) page.classList.add("page-cover-top");
-                else page.classList.add("page-cover-bottom");
-            }
+    $("btnFull") &&
+        ($("btnFull").onclick = () => {
+            const stage = $("flipbook-stage");
+            if (!stage) return;
+            if (!document.fullscreenElement) stage.requestFullscreen?.();
+            else document.exitFullscreen?.();
+        });
 
-            page.innerHTML = `
+    $("btnSearch") && ($("btnSearch").onclick = () => alert("Search UI next step 😈"));
+
+    $("btnSound") &&
+        ($("btnSound").onclick = () => {
+            soundOn = !soundOn;
+            localStorage.setItem("flip:sound", soundOn ? "1" : "0");
+            paintIcons();
+            (soundOn ? SFX.soundOn : SFX.soundOff).play().catch(() => { });
+        });
+
+    // Stage menu wiring (optional; safe if markup not present yet)
+    const stageMenu = $("stageMenu");
+    const btnStage = $("btnStage");
+
+    function renderStageMenu() {
+        if (!stageMenu) return;
+        stageMenu.innerHTML = STAGES.map(
+            ([k, label]) =>
+                `<button type="button" data-stage="${k}">${k === stageKey ? "■" : "□"} ${label}</button>`
+        ).join("");
+    }
+
+    if (btnStage && stageMenu) {
+        renderStageMenu();
+
+        btnStage.onclick = () => {
+            playSfx("click");
+            stageMenu.classList.toggle("is-open");
+        };
+
+        stageMenu.addEventListener("click", (e) => {
+            const btn = e.target.closest("button[data-stage]");
+            if (!btn) return;
+            stageKey = btn.dataset.stage;
+            localStorage.setItem("flip:stage", stageKey);
+            applyStage();
+            renderStageMenu();
+        });
+    }
+
+    // Button SFX
+    function wireButtonSfx(...ids) {
+        ids.forEach((id) => {
+            const el = $(id);
+            if (!el) return;
+            el.addEventListener("pointerenter", () => playSfx("hover"));
+            el.addEventListener("click", () => playSfx("click"));
+        });
+    }
+
+    wireButtonSfx(
+        "btnFirst",
+        "btnPrev",
+        "btnNext",
+        "btnLast",
+        "zoomOut",
+        "zoomIn",
+        "btnTiles",
+        "btnMore",
+        "btnShare",
+        "btnPrint",
+        "btnFull",
+        "btnSearch",
+        "btnSound",
+        "btnStage"
+    );
+}
+
+function init() {
+    const el = $("flipbook");
+    if (!el) return false;
+    if (!window.St?.PageFlip) return false;
+    if (el.dataset.flipInit === "1") return true;
+    el.dataset.flipInit = "1";
+
+    const pageFlip = new window.St.PageFlip(el, {
+        width: 2000,
+        height: 1680,
+        size: "stretch",
+        minWidth: 320,
+        maxWidth: 2000,
+        minHeight: 400,
+        maxHeight: 1680,
+        maxShadowOpacity: 0.18,
+        showCover: true,
+        mobileScrollSupport: true,
+    });
+
+    const pages = buildPages();
+
+    const container = document.getElementById("flipbook");
+    if (!container) { console.error("❌ #flipbook not found"); return false; }
+
+    container.innerHTML = "";
+
+    pages.forEach((src, i) => {
+        const page = document.createElement("div");
+        page.className = "page";
+
+        if (i === 0 || i === pages.length - 1) {
+            page.setAttribute("data-density", "hard");
+            page.classList.add("page-cover");
+            if (i === 0) page.classList.add("page-cover-top");
+            else page.classList.add("page-cover-bottom");
+        }
+
+        page.innerHTML = `
     <div class="page-content">
       <div class="page-image" style="background-image:url('${src}')"></div>
     </div>
   `;
 
-            container.appendChild(page);
-        });
+        container.appendChild(page);
+    });
 
-        pageFlip.loadFromHTML(container.querySelectorAll(".page"));
-        window.__flipbook = { pageFlip };
+    pageFlip.loadFromHTML(container.querySelectorAll(".page"));
+    window.__flipbook = { pageFlip };
 
 
-        // choose start page: hash beats localStorage beats 1
-        const m = location.hash.match(/p=(\d+)/);
-        const hashHuman = m ? Number(m[1]) : null;
-        const storedHuman = Number(localStorage.getItem("flip:page") || "1");
-        const desiredHuman = Number.isFinite(hashHuman) ? hashHuman : storedHuman;
-        const desiredIndex = Math.max(0, Math.min(TOTAL_PAGES - 1, desiredHuman - 1));
+    // choose start page: hash beats localStorage beats 1
+    const m = location.hash.match(/p=(\d+)/);
+    const hashHuman = m ? Number(m[1]) : null;
+    const storedHuman = Number(localStorage.getItem("flip:page") || "1");
+    const desiredHuman = Number.isFinite(hashHuman) ? hashHuman : storedHuman;
+    const desiredIndex = Math.max(0, Math.min(TOTAL_PAGES - 1, desiredHuman - 1));
 
-        pageFlip.flip(desiredIndex);
-        syncPageIndicator(desiredIndex + 1);
+    pageFlip.flip(desiredIndex);
+    syncPageIndicator(desiredIndex + 1);
 
-        pageFlip.on("flip", (e) => {
-            playRandomTurn();
-            const human = (e.data ?? e) + 1;
-            localStorage.setItem("flip:page", String(human));
-            syncPageIndicator(human);
-        });
+    pageFlip.on("flip", (e) => {
+        playRandomTurn();
+        const human = (e.data ?? e) + 1;
+        localStorage.setItem("flip:page", String(human));
+        syncPageIndicator(human);
+    });
 
-        setTimeout(wireUI, 50);
-        return true;
-    }
+    setTimeout(wireUI, 50);
+    return true;
+}
 
-    let tries = 0;
-    const t = setInterval(() => {
-        tries++;
-        const ok = init();
-        if (ok || tries > 400) clearInterval(t);
-    }, 50);
-})();
+let tries = 0;
+const t = setInterval(() => {
+    tries++;
+    const ok = init();
+    if (ok || tries > 400) clearInterval(t);
+}, 50);
+}) ();
