@@ -24,23 +24,13 @@ input {
   inset: 0;
   width: 100vw;
   height: 100vh;
-  padding: 10px 10px 10px 10px;
+  padding: 15px 15px 120px;
   box-sizing: border-box;
   background: var(--stage-img, var(--stage-table)) center / cover no-repeat;
   display: flex;
   align-items: center !important;
   justify-content: center !important;
   overflow: hidden;
-}
-
-#flipbook-stage::before {
-  content: "";
-  position: absolute;
-  inset: -4%;
-  ;
-  background: var(--book-frame) center / contain no-repeat;
-  pointer-events: none;
-  z-index: 1;
 }
 
 .stagemenu {
@@ -60,10 +50,9 @@ input {
   text-align: left;
 }
 
-#flipbook-wrap {
+#flipbook-wrap{
   width: 100%;
   height: 100%;
-  top: 60px;
   max-width: none;
   max-height: none;
   display: flex;
@@ -74,6 +63,20 @@ input {
   touch-action: none;
   position: relative;
   z-index: 2;
+}
+
+#flipbook-wrap::before{
+  content:"";
+  position:absolute;
+  inset:-6%;
+  background: var(--book-frame) center / contain no-repeat;
+  pointer-events:none;
+  z-index: 0;
+}
+
+#flipbook{
+  position: relative;
+  z-index: 1;
 }
 
 #flipbook-wrap.can-pan {
