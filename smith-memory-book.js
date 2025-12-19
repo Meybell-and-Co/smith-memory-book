@@ -318,7 +318,6 @@ console.log("✅ main script started");
         $("btnTiles") &&
             ($("btnTiles").onclick = () => {
                 $("tiles")?.classList.toggle("is-open");
-                if ($("tiles")?.classList.contains("is-open")) playSfx("tiles");
                 buildTilesOnce();
             });
 
