@@ -495,12 +495,13 @@ console.log("✅ main script started");
       <div class="page-image" style="background-image:url('${src}')"></div>
     </div>
   `;
+
             container.appendChild(page);
         });
 
         pageFlip.loadFromHTML(container.querySelectorAll(".page"));
-
         window.__flipbook = { pageFlip };
+
 
         // choose start page: hash beats localStorage beats 1
         const m = location.hash.match(/p=(\d+)/);
