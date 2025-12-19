@@ -67,6 +67,13 @@ canvas {
   background: transparent !important;
 }
 
+#flipbook .stf__wrapper,
+#flipbook .stf__block,
+#flipbook canvas.stf__canvas {
+  background: transparent !important;
+  height: 100% !important;
+}
+
 /* Decorative book frame overlay */
 #flipbook-stage::before{
   content: "";
