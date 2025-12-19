@@ -95,7 +95,7 @@ console.log("✅ main script started");
         a.play().catch(() => { });
     }
 
-    function pageUrl(humanPageNum) {
+    function pageUrl1(humanPageNum) {
         const n = String(humanPageNum).padStart(4, "0");
         return `${BASE}lembo_${n}.webp`;
     }
