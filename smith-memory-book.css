@@ -45,18 +45,11 @@ button, input{
   overflow: hidden;
 }
 
-#flipbook-stage .stf__parent {
-  height: 100%;
-  width: 100%;
-}
-
-#flipbook-stage .stf__wrapper {
-  height: 100%;
-  padding-bottom: 0 !important; /* kills letterbox */
-}
-
+#flipbook-stage .stf__parent,
+#flipbook-stage .stf__wrapper,
 #flipbook-stage .stf__block,
 #flipbook-stage canvas.stf__canvas {
+  height: 100% !important;
   height: 100% !important;
 }
 
