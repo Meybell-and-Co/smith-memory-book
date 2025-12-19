@@ -24,7 +24,8 @@ console.log("✅ main script started");
         soundOff: ICON_BASE + "sound-off-gold.png",
         prev: ICON_BASE + "previous-gold.png",
         next: ICON_BASE + "next-gold.png",
-        pan: ICON_BASE + "pan-gold.png"
+        pan: ICON_BASE + "grab-open-gold.png",
+        grab: ICON_BASE + "grab-closed-gold.png"
     };
 
     const STAGES = [

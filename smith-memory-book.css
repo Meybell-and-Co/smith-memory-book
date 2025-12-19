@@ -64,6 +64,8 @@ input {
   position: relative;
   z-index: 2;
   transition: cursor 0.05s linear;
+  --cursor-open: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/flipbook-ui-icons/grab-open-gold.png");
+  --cursor-closed: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/flipbook-ui-icons/grab-closed-gold.png");
 }
 
 #flipbook-wrap::before {
@@ -81,11 +83,11 @@ input {
 }
 
 #flipbook-wrap.can-pan {
-  cursor: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/flipbook-ui-icons/grab-open-gold.png") 16 16, grab;
+  cursor: url("grab-open-gold.png") 16 16, grab;
 }
 
 #flipbook-wrap.can-pan:active {
-  cursor: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/flipbook-ui-icons/grab-closed-gold.png") 16 16, grabbing;
+  cursor: url("grab-closed-gold.png") 16 16, grabbing;
 }
 
 #flipbook {
