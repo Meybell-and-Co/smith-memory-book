@@ -215,7 +215,19 @@
 
     pageFlip.loadFromImages(buildPages());
     SMB.flipbook = { pageFlip };
+    
+function SMB_forceFlipbookFill() {
+  const wrapper = document.querySelector(".stf__wrapper");
+  if (!wrapper) return;
 
+  wrapper.style.paddingBottom = "";
+  wrapper.style.height = "100%";
+}
+
+SMB_forceFlipbookFill();
+window.addEventListener("resize", SMB_forceFlipbookFill);
+requestAnimationFrame(SMB_forceFlipbookFill);
+    
     pageFlip.on("flip", () => playRandomTurn());
 
     // Now that PF exists, ensure UI is wired
