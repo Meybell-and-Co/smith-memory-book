@@ -193,13 +193,13 @@
   }
 
   function init() {
-    const el = $("flipbook");
+    const el = document.getElementById("flipbook");
     if (!el) return false;
     if (!window.St || typeof window.St.PageFlip !== "function") return false;
     if (el.dataset.flipInit === "1") return true;
 
     el.dataset.flipInit = "1";
-
+        
     const pageFlip = new St.PageFlip(el, {
       width: 2000,
       height: 1680,
@@ -217,13 +217,32 @@
     SMB.flipbook = { pageFlip };
     
 function SMB_forceFlipbookFill() {
-  const wrapper = document.querySelector(".stf__wrapper");
+  const wrapper = el.querySelector(".stf__wrapper");
   if (!wrapper) return;
-
-  wrapper.style.paddingBottom = "";
+  wrapper.style.paddingBottom = "0px";
   wrapper.style.height = "100%";
 }
 
+function SMB_forceFlipbookFillBurst() {
+  SMB_forceFlipbookFill();
+  requestAnimationFrame(SMB_forceFlipbookFill);
+  setTimeout(SMB_forceFlipbookFill, 0);
+  setTimeout(SMB_forceFlipbookFill, 50);
+  setTimeout(SMB_forceFlipbookFill, 150);
+}
+
+SMB_forceFlipbookFillBurst();
+
+window.addEventListener("resize", SMB_forceFlipbookFillBurst);
+pageFlip.on("init", SMB_forceFlipbookFillBurst);
+pageFlip.on("changeOrientation", SMB_forceFlipbookFillBurst);
+
+pageFlip.on("flip", () => playRandomTurn());
+wireUI();    
+
+return true;
+  }
+    
 SMB_forceFlipbookFill();
 window.addEventListener("resize", SMB_forceFlipbookFill);
 requestAnimationFrame(SMB_forceFlipbookFill);
