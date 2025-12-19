@@ -38,6 +38,9 @@ console.log("✅ main script started");
         ["cancun", "Poolside"],
     ];
 
+    const DEFAULT_ZOOM = 0.8;
+    const OPTICAL_NUDGE_Y = +12;
+
     const $ = (id) => document.getElementById(id);
 
     function makeAudio(url, vol = 0.6) {
@@ -337,16 +340,22 @@ console.log("✅ main script started");
             panY = Math.round((wrapRect.height - bookRect.height) / 2);
         }
 
+        function resetViewToComfort() {
+            zoom = DEFAULT_ZOOM;
+            setZoom(zoom);
+
+            panX = 0;
+            centerBookVertically();
+
+            panY += OPTICAL_NUDGE_Y;
+
+            if (typeof applyPan === "function") applyPan();
+        }
+
         $("zoomReset") && (
             $("zoomReset").onclick = () => {
-                console.log("🔄 Reset zoom");
-                zoom = 0.8;
-                setZoom(zoom);
-
-                panX = 0;
-                centerBookVertically();
-
-                if (typeof applyPan === "function") applyPan();
+                console.log("🔄 Reset view");
+                resetViewToComfort();
             }
         );
 
