@@ -320,3 +320,15 @@ input {
   background-position: center;
   background-size: contain;
 }
+
+/* 👻
+.page.page-ghost{
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+.page.page-ghost .page-content,
+.page.page-ghost .page-image{
+  display: none !important;
+}

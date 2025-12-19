@@ -95,7 +95,7 @@ console.log("✅ main script started");
         a.play().catch(() => { });
     }
 
-    function pageUrl1(humanPageNum) {
+    function pageUrl(humanPageNum) {
         const n = String(humanPageNum).padStart(4, "0");
         return `${BASE}lembo_${n}.webp`;
     }
@@ -103,13 +103,19 @@ console.log("✅ main script started");
     function buildPages() {
         const pages = [];
 
-        pages.push(pageUrl1(1));
+        pages.push(pageUrl(1));
+
+        // 👻
+        pages.push(null);
 
         for (let p = 2; p <= TOTAL_PAGES - 1; p++) {
-            pages.push(pageUrl1(p));
+            pages.push(pageUrl(p));
         }
 
-        pages.push(pageUrl1(TOTAL_PAGES));
+        // 👻
+        pages.push(null);
+
+        pages.push(pageUrl(TOTAL_PAGES));
 
         console.log("pages sanity:", pages[0], pages[1], pages.at(-2), pages.at(-1), "len", pages.length);
 
@@ -507,6 +513,7 @@ console.log("✅ main script started");
             const page = document.createElement("div");
             page.className = "page";
 
+            // Covers: first + last only
             if (i === 0 || i === pages.length - 1) {
                 page.setAttribute("data-density", "hard");
                 page.classList.add("page-cover");
@@ -514,6 +521,14 @@ console.log("✅ main script started");
                 else page.classList.add("page-cover-bottom");
             }
 
+            // ✅ Ghost spacer page (src is null)
+            if (!src) {
+                page.classList.add("page-ghost");
+                container.appendChild(page);
+                return;
+            }
+
+            // Normal page with image
             page.innerHTML = `
     <div class="page-content">
       <div class="page-image" style="background-image:url('${src}')"></div>
