@@ -454,7 +454,7 @@ body.is-reading #flipbook-wrap {
 
   inset: auto;
   right: 31.5%;
-  bottom: 11%;
+  bottom: 14%;
 
   width: 180px;
   height: 180px;
@@ -467,7 +467,7 @@ body.is-reading #flipbook-wrap {
   background-image: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/flipbook-ui-icons/click-me-to-start.gif");
   background-repeat: no-repeat;
   background-position: center;
-  background-size: 220px auto;
+  background-size: 160px auto;
   transition-delay: 0s;
 }
 
