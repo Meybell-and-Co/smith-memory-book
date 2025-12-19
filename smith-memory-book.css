@@ -83,11 +83,11 @@ input {
 }
 
 #flipbook-wrap.can-pan {
-  cursor: url("grab-open-gold.png") 16 16, grab;
+  cursor: var(--cursor-open) 16 16, grab;
 }
 
 #flipbook-wrap.can-pan:active {
-  cursor: url("grab-closed-gold.png") 16 16, grabbing;
+  cursor: var(--cursor-closed) 16 16, grabbing;
 }
 
 #flipbook {
