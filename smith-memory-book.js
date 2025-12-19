@@ -585,33 +585,28 @@ console.log("✅ main script started");
             goToHuman(TOTAL_PAGES);  // back cover (239)
         });
 
-        // Prev/Next
+        // Prev / Next
+        els.btnNext?.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            pageFlip?.flipNext();
+        });
+
         els.btnPrev?.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
-            pageFlip?.flipPrev();
-        });
 
-        document.getElementById("btnPrev")?.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            // If we're on (or effectively at) the front cover, treat BACK as "return to resting"
             const human = Number(localStorage.getItem("flip:page") || "1");
 
             if (human <= 1) {
-                // ---- Return to resting state ----
                 document.body.classList.remove("is-reading");
                 document.getElementById("flipbook-stage")?.classList.add("is-resting");
 
-                // hide flipbar
                 const flipbar = document.getElementById("flipbar");
                 if (flipbar) flipbar.style.display = "none";
 
-                // remove any interaction shield
                 document.getElementById("interactionShield")?.classList.remove("is-on");
 
-                // ✅ keep helper GIF disabled for this return
                 const hint = document.getElementById("startHint");
                 if (hint) {
                     hint.style.display = "none";
@@ -619,14 +614,12 @@ console.log("✅ main script started");
                     hint.style.transform = "translateY(6px)";
                 }
 
-                // reset landing for next start
                 localStorage.setItem("flip:page", "3");
                 location.hash = "";
                 return;
             }
 
-            // otherwise normal back behavior
-            window.__flipbook?.pageFlip?.flipPrev();
+            pageFlip?.flipPrev();
         });
 
         // Page jump
