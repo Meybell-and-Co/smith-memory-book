@@ -64,6 +64,9 @@ input {
   position: relative;
   z-index: 2;
   transition: cursor 0.05s linear;
+}
+
+#flipbook-wrap {
   --cursor-open: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/flipbook-ui-icons/grab-open-gold.png");
   --cursor-closed: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/flipbook-ui-icons/grab-closed-gold.png");
 }
@@ -82,11 +85,13 @@ input {
   z-index: 1;
 }
 
-#flipbook-wrap.can-pan {
+#flipbook-wrap.can-pan,
+#flipbook-wrap.can-pan * {
   cursor: var(--cursor-open) 16 16, grab;
 }
 
-#flipbook-wrap.can-pan:active {
+#flipbook-wrap.is-dragging,
+#flipbook-wrap.is-dragging * {
   cursor: var(--cursor-closed) 16 16, grabbing;
 }
 
