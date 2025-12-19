@@ -24,7 +24,7 @@ input {
   inset: 0;
   width: 100vw;
   height: 100vh;
-  padding: 75px 75px 75px;
+  padding: 15px 15px 15px;
   box-sizing: border-box;
   background: var(--stage-img, var(--stage-table)) center / cover no-repeat;
   display: flex;
