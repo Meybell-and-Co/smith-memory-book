@@ -323,21 +323,27 @@ console.log("✅ main script started");
             e.currentTarget.blur();
         });
 
-        $("zoomIn") && ($("zoomIn").onclick = () => setZoom(zoom + 0.1));
-        $("zoomOut") && ($("zoomOut").onclick = () => setZoom(zoom - 0.1));
-
         $("zoomReset") && (
             $("zoomReset").onclick = () => {
-                console.log("🔄 Reset zoom");
-
-                zoom = 1;
-                setZoom(1);
+                zoom = 0.8;
+                setZoom(zoom);
 
                 panX = 0;
-                panY = 0;
+                centerBookVertically();
                 applyPan?.();
             }
         );
+
+        function centerBookVertically() {
+            const wrap = $("flipbook-wrap");
+            const book = $("flipbook");
+            if (!wrap || !book) return;
+
+            const wrapRect = wrap.getBoundingClientRect();
+            const bookRect = book.getBoundingClientRect();
+
+            panY = Math.round((wrapRect.height - bookRect.height) / 2);
+        }
 
         document.title = `Zoom ${Math.round(zoom * 100)}%`;
 
