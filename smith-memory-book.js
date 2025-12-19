@@ -1,6 +1,6 @@
 (function () {
   console.log("✅ main script started");
-  console.log("🔥 SMB MAIN JS v2025-12-18 — wrap-measured + update() + safe reinit");
+  console.log("🔥 SMB MAIN JS v2025-12-18 — wrap-measured + update() + safe reinit (clean)");
 
   // ---- App namespace (ONE global, intentionally) ----
   window.SMB = window.SMB || {};
@@ -207,21 +207,30 @@
     return { w: Math.floor(r.width), h: Math.floor(r.height) };
   }
 
+  // ---- Safe update (deferred one frame so PF can create canvas/DOM) ----
   function safeUpdatePF(pf, w, h) {
-    try {
-      // Some builds expose update(), some updateRender(), some neither.
-      if (pf && typeof pf.update === "function") pf.update();
-      if (pf && typeof pf.updateRender === "function") pf.updateRender();
-    } catch (e) {
-      console.warn("PF update warning:", e);
-    }
+    if (!pf) return;
 
-    // Also re-run wrapper fix after update
-    const el = $("flipbook");
-    SMB_forceFlipbookFillBurst(el);
+    requestAnimationFrame(() => {
+      try {
+        if (typeof pf.update === "function") {
+          pf.update();
+        } else if (typeof pf.updateRender === "function") {
+          pf.updateRender();
+        }
 
-    // Debug line you can watch in console:
-    console.log("📐 wrap:", w, h, "| canvas:", document.querySelector("#flipbook canvas.stf__canvas")?.getBoundingClientRect?.());
+        // wrapper fix AFTER PF had a frame to create DOM
+        const el = $("flipbook");
+        SMB_forceFlipbookFillBurst(el);
+
+        // If you ever need debugging again, use safe form:
+        // const c = document.querySelector("#flipbook canvas.stf__canvas");
+        // console.log("📐 wrap:", w, h, "| canvas:", c ? c.getBoundingClientRect() : null);
+
+      } catch (e) {
+        console.warn("PF update warning:", e);
+      }
+    });
   }
 
   // ---- Init / Re-init PageFlip ----
