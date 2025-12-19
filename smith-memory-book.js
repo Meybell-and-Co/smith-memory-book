@@ -477,6 +477,10 @@ console.log("✅ main script started");
         });
 
         const pages = buildPages();
+
+        const container = document.getElementById("flipbook");
+        if (!container) { console.error("❌ #flipbook not found"); return false; }
+
         container.innerHTML = "";
 
         pages.forEach((src, i) => {
