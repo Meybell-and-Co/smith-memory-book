@@ -1,6 +1,6 @@
 (function () {
   console.log("✅ main script started");
-  console.log("🔥 SMB MAIN JS v2025-12-18 — stretch-to-wrap + safe reinit");
+  console.log("🔥 SMB MAIN JS v2025-12-18 — wrap-measured + update() + safe reinit");
 
   // ---- App namespace (ONE global, intentionally) ----
   window.SMB = window.SMB || {};
@@ -89,7 +89,7 @@
 
   // ---- State ----
   let soundOn = (localStorage.getItem("flip:sound") ?? "1") === "1";
-  let zoom = Number(localStorage.getItem("flip:zoom") || "1"); // (kept for future; not used here)
+  let zoom = Number(localStorage.getItem("flip:zoom") || "1"); // kept for later
   let stageKey = localStorage.getItem("flip:stage") || "table";
 
   const stageEl = $("flipbook-stage");
@@ -116,7 +116,6 @@
     a.play().catch(() => {});
   }
 
-  // Build a URL from an IMAGE number (filename number)
   function pageUrlFromImageNumber(imageNumber) {
     const n = String(imageNumber).padStart(4, "0");
     return `${BASE}lembo_${n}.webp`;
@@ -149,7 +148,7 @@
   }
 
   function getPF() {
-    return SMB.flipbook || null; // we store the instance directly
+    return SMB.flipbook || null;
   }
 
   // ---- UI wiring (safe to run before PF exists) ----
@@ -180,23 +179,13 @@
       const safeHuman = Math.max(PageMap.HUMAN_MIN, Math.min(PageMap.HUMAN_MAX, n));
       getPF()?.flip(PageMap.humanToFlipIndex(safeHuman));
     });
-
-    console.table(
-      [1, 2, 3, 4, 5].map((h) => ({
-        human: h,
-        image: PageMap.humanToImageNumber(h),
-        flipIndex: PageMap.humanToFlipIndex(h),
-      }))
-    );
   }
 
-  // ---- Flipbook fill helpers ----
+  // ---- Force vendor wrapper to behave ----
   function SMB_forceFlipbookFill(el) {
     if (!el) return;
     const wrapper = el.querySelector(".stf__wrapper");
     if (!wrapper) return;
-
-    // kill vendor aspect-ratio padding trick and force full height
     wrapper.style.paddingBottom = "0px";
     wrapper.style.height = "100%";
     wrapper.style.width = "100%";
@@ -206,11 +195,11 @@
     SMB_forceFlipbookFill(el);
     requestAnimationFrame(() => SMB_forceFlipbookFill(el));
     setTimeout(() => SMB_forceFlipbookFill(el), 0);
-    setTimeout(() => SMB_forceFlipbookFill(el), 50);
-    setTimeout(() => SMB_forceFlipbookFill(el), 150);
+    setTimeout(() => SMB_forceFlipbookFill(el), 60);
+    setTimeout(() => SMB_forceFlipbookFill(el), 180);
   }
 
-  // ---- Measure the wrap (the thing you sized to viewport minus padding) ----
+  // ---- Measure wrap ----
   function getWrapSize() {
     const wrap = $("flipbook-wrap");
     if (!wrap) return { w: 0, h: 0 };
@@ -218,7 +207,24 @@
     return { w: Math.floor(r.width), h: Math.floor(r.height) };
   }
 
-  // ---- Init / Re-init PageFlip (fills wrap) ----
+  function safeUpdatePF(pf, w, h) {
+    try {
+      // Some builds expose update(), some updateRender(), some neither.
+      if (pf && typeof pf.update === "function") pf.update();
+      if (pf && typeof pf.updateRender === "function") pf.updateRender();
+    } catch (e) {
+      console.warn("PF update warning:", e);
+    }
+
+    // Also re-run wrapper fix after update
+    const el = $("flipbook");
+    SMB_forceFlipbookFillBurst(el);
+
+    // Debug line you can watch in console:
+    console.log("📐 wrap:", w, h, "| canvas:", document.querySelector("#flipbook canvas.stf__canvas")?.getBoundingClientRect?.());
+  }
+
+  // ---- Init / Re-init PageFlip ----
   let initInFlight = false;
 
   function destroyExisting() {
@@ -229,11 +235,9 @@
       console.warn("destroyExisting warning:", e);
     }
     SMB.flipbook = null;
-    const el = $("flipbook");
-    if (el) delete el.dataset.flipInit;
   }
 
-  function initOrReinit() {
+  function initOrReinit(reason = "init") {
     const el = $("flipbook");
     if (!el) return false;
 
@@ -241,7 +245,7 @@
     if (initInFlight) return true;
 
     const { w, h } = getWrapSize();
-    if (w < 50 || h < 50) return false; // not laid out yet
+    if (w < 100 || h < 100) return false; // not laid out yet
 
     initInFlight = true;
 
@@ -257,8 +261,14 @@
     destroyExisting();
 
     try {
+      console.log(`🧱 PageFlip build (${reason}) using wrap:`, w, h);
+
       const pageFlip = new St.PageFlip(el, {
-        // IMPORTANT: stretch to available envelope
+        // baseline size (helps some builds actually honor wrap sizing)
+        width: w,
+        height: h,
+
+        // stretch envelope
         size: "stretch",
         minWidth: 320,
         maxWidth: w,
@@ -270,69 +280,61 @@
         mobileScrollSupport: true,
       });
 
-      // load pages FIRST (if this throws, we don't poison state)
       pageFlip.loadFromImages(buildPages());
 
-      // store instance
       SMB.flipbook = pageFlip;
-      el.dataset.flipInit = "1";
 
-      // transparent clear (canvas renderer), if supported
-      const render = pageFlip.getRender?.();
-      if (render && render.ctx && render.canvas) {
-        render.clear = function () {
-          this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        };
-      }
-
-      // force-fill now + on events
-      SMB_forceFlipbookFillBurst(el);
-
-      pageFlip.on("init", () => SMB_forceFlipbookFillBurst(el));
-      pageFlip.on("changeOrientation", () => SMB_forceFlipbookFillBurst(el));
-
-      // sounds + UI
+      // events
       pageFlip.on("flip", () => playRandomTurn());
+      pageFlip.on("init", () => safeUpdatePF(pageFlip, w, h));
+      pageFlip.on("changeOrientation", () => safeUpdatePF(pageFlip, w, h));
+
       wireUI();
 
-      // jump back to where we were (best effort)
+      // go back to current page
       const safeHuman = Math.max(PageMap.HUMAN_MIN, Math.min(PageMap.HUMAN_MAX, keepHuman));
       pageFlip.flip(PageMap.humanToFlipIndex(safeHuman));
+
+      // immediate + delayed update (layout settles after images/fonts/paint)
+      safeUpdatePF(pageFlip, w, h);
+      requestAnimationFrame(() => safeUpdatePF(pageFlip, w, h));
+      setTimeout(() => safeUpdatePF(pageFlip, w, h), 120);
 
       return true;
     } catch (e) {
       console.error("❌ PageFlip init failed:", e);
       return false;
     } finally {
-      // allow a tiny delay so resize bursts don't stampede
       setTimeout(() => {
         initInFlight = false;
-      }, 100);
+      }, 120);
     }
   }
 
   // ---- Bootstrap ----
-  // Wire UI once DOM exists
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", wireUI, { once: true });
   } else {
     wireUI();
   }
 
-  // Retry init until St.PageFlip is ready
+  // retry init until St.PageFlip is ready
   let tries = 0;
   const t = setInterval(() => {
     tries++;
-    const ok = initOrReinit();
-    if (ok || tries > 60) clearInterval(t);
+    const ok = initOrReinit("retry");
+    if (ok || tries > 80) clearInterval(t);
   }, 50);
 
-  // Reinit on resize (fills the 120px padded stage correctly)
+  // One extra build after first paint (common “it measured too early” fix)
+  window.addEventListener("load", () => {
+    setTimeout(() => initOrReinit("load"), 50);
+  });
+
+  // resize rebuild
   let resizeTO = null;
   window.addEventListener("resize", () => {
     clearTimeout(resizeTO);
-    resizeTO = setTimeout(() => {
-      initOrReinit();
-    }, 150);
+    resizeTO = setTimeout(() => initOrReinit("resize"), 180);
   });
 })();
