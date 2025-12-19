@@ -500,20 +500,21 @@ body.is-reading #flipbook-wrap {
   }
 }
 
-/* ---- Interaction shield to stop peel-back on page 1 ---- */
 #interactionShield {
   position: absolute;
-  inset: 0;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 50%;
   z-index: 999;
-  /* above the flipbook pages */
   display: none;
-  pointer-events: auto;
-  /* intercepts mouse */
+  pointer-events: none;
   background: transparent;
 }
 
 #interactionShield.is-on {
   display: block;
+  pointer-events: auto;
 }
 
 .ibtn.is-disabled {

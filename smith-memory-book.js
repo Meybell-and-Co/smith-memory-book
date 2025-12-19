@@ -508,7 +508,8 @@ console.log("✅ main script started");
         localStorage.setItem("flip:page", String(START_HUMAN_PAGE));
         localStorage.setItem("flip:stage", DEFAULT_STAGE_KEY);
         location.hash = "";
-
+        allowBackUnder3Once = false;
+        
         // hide hint & start screen
         SMB.hideStartHint();
         if (els.startScreen) els.startScreen.style.display = "none";
@@ -535,6 +536,7 @@ console.log("✅ main script started");
         // Ensure end state matches start
         document.body.classList.remove("is-reading");
         els.stage?.classList.add("is-resting");
+        allowBackUnder3Once = false;
 
         // flipbar hidden
         setFlipbarVisible(false);
@@ -607,9 +609,7 @@ console.log("✅ main script started");
         els.btnFirst?.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
-            allowBackUnder3Once = true;
-            initFlipbookOnce();      // safe if already inited
-            goToHuman(1);            // front cover
+            goToStartState();
         });
 
         els.btnLast?.addEventListener("click", (e) => {
