@@ -2,253 +2,214 @@ console.log("✅ inline flipbook script loaded");
 console.log("✅ main script started");
 
 (function () {
-    const BASE = "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/pages/";
-    const TOTAL_PAGES = 239;
+  // ---- Config ----
+  const BASE = "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/pages/";
+  const TOTAL_PAGES = 239;
 
-    const ICON_BASE = "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/flipbook-ui-icons/";
-    const ROOT = "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/";
-    const SOUND_BASE = ROOT + "sounds/";
+  const ROOT = "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/";
+  const ICON_BASE = ROOT + "flipbook-ui-icons/";
+  const SOUND_BASE = ROOT + "sounds/";
 
-    const ICONS = {
-        zoomIn: ICON_BASE + "add-gold.png",
-        zoomOut: ICON_BASE + "subtract-gold.png",
-        tiles: ICON_BASE + "tiles-gold.png",
-        search: ICON_BASE + "search-gold.png",
-        share: ICON_BASE + "share-gold.png",
-        print: ICON_BASE + "print-gold.png",
-        fullscreen: ICON_BASE + "maximize-gold.png",
-        more: ICON_BASE + "ellipsis-gold.png",
-        start: ICON_BASE + "start-gold.png",
-        end: ICON_BASE + "end-gold.png",
-        soundOn: ICON_BASE + "sound-gold.png",
-        soundOff: ICON_BASE + "sound-off-gold.png",
-        prev: ICON_BASE + "previous-gold.png",
-        next: ICON_BASE + "next-gold.png",
-        pan: ICON_BASE + "grab-open-gold.png",
-        grab: ICON_BASE + "grab-closed-gold.png",
-        reset: ICON_BASE + "reset-gold.png",
-    };
+  const ICONS = {
+    zoomIn: ICON_BASE + "add-gold.png",
+    zoomOut: ICON_BASE + "subtract-gold.png",
+    tiles: ICON_BASE + "tiles-gold.png",
+    search: ICON_BASE + "search-gold.png",
+    share: ICON_BASE + "share-gold.png",
+    print: ICON_BASE + "print-gold.png",
+    fullscreen: ICON_BASE + "maximize-gold.png",
+    more: ICON_BASE + "ellipsis-gold.png",
+    start: ICON_BASE + "start-gold.png",
+    end: ICON_BASE + "end-gold.png",
+    soundOn: ICON_BASE + "sound-gold.png",
+    soundOff: ICON_BASE + "sound-off-gold.png",
+    prev: ICON_BASE + "previous-gold.png",
+    next: ICON_BASE + "next-gold.png",
+    pan: ICON_BASE + "grab-open-gold.png",
+    grab: ICON_BASE + "grab-closed-gold.png",
+    reset: ICON_BASE + "reset-gold.png",
+  };
 
-    const STAGES = [
-        ["table", "Table"],
-        ["parquet", "Parquet"],
-        ["kitchen", "Counter"],
-        ["basement", "Basement"],
-        ["lawn", "Lawn"],
-        ["cancun", "Poolside"],
-    ];
+  const STAGES = [
+    ["table", "Table"],
+    ["parquet", "Parquet"],
+    ["kitchen", "Counter"],
+    ["basement", "Basement"],
+    ["lawn", "Lawn"],
+    ["cancun", "Poolside"],
+  ];
 
-    const DEFAULT_ZOOM = 0.8;
-    const OPTICAL_NUDGE_Y = +20;
+  const DEFAULT_ZOOM = 0.8;
+  const OPTICAL_NUDGE_Y = 20;
 
-    const $ = (id) => document.getElementById(id);
+  const $ = (id) => document.getElementById(id);
 
-    const overlay = $("cover-inside-overlay");
+  // ---- State ----
+  let soundOn = (localStorage.getItem("flip:sound") ?? "1") === "1";
+  let zoom = Number(localStorage.getItem("flip:zoom") || String(DEFAULT_ZOOM));
 
-    function makeAudio(url, vol = 0.6) {
-        const a = new Audio(url);
-        a.preload = "auto";
-        a.volume = vol;
-        return a;
-    }
+  let stageKey = localStorage.getItem("flip:stage") || "table";
+  const stageEl = $("flipbook-stage");
 
-    // --- state ---
-    let soundOn = (localStorage.getItem("flip:sound") ?? "1") === "1";
-    let zoom = Number(localStorage.getItem("flip:zoom") || String(DEFAULT_ZOOM));
+  let panX = 0,
+    panY = 0;
+  let isPanning = false,
+    panSX = 0,
+    panSY = 0,
+    panOX = 0,
+    panOY = 0;
 
-    let stageKey = localStorage.getItem("flip:stage") || "table";
-    const stageEl = $("flipbook-stage");
+  // For future cover physics (currently unused but harmless)
+  let coverShiftX = 0;
 
-    let panX = 0,
-        panY = 0;
-    let isPanning = false,
-        panSX = 0,
-        panSY = 0,
-        panOX = 0,
-        panOY = 0;
+  function makeAudio(url, vol = 0.6) {
+    const a = new Audio(url);
+    a.preload = "auto";
+    a.volume = vol;
+    return a;
+  }
 
-    const SFX = {
-        hover: makeAudio(SOUND_BASE + "hover.mp3", 0.35),
-        click: makeAudio(SOUND_BASE + "light-click.mp3", 0.45),
-        tiles: makeAudio(SOUND_BASE + "tiles-popping-up.mp3", 0.55),
-        soundOn: makeAudio(SOUND_BASE + "notification-enable.mp3", 0.55),
-        soundOff: makeAudio(SOUND_BASE + "notification-disable.mp3", 0.55),
-        pageTurns: [
-            makeAudio(SOUND_BASE + "page-turn-01.mp3", 0.7),
-            makeAudio(SOUND_BASE + "page-turn-02.mp3", 0.7),
-            makeAudio(SOUND_BASE + "page-turn-03.mp3", 0.7),
-            makeAudio(SOUND_BASE + "page-turn-04.mp3", 0.7),
-            makeAudio(SOUND_BASE + "page-turn-05.mp3", 0.7),
-        ],
-    };
+  const SFX = {
+    hover: makeAudio(SOUND_BASE + "hover.mp3", 0.35),
+    click: makeAudio(SOUND_BASE + "light-click.mp3", 0.45),
+    tiles: makeAudio(SOUND_BASE + "tiles-popping-up.mp3", 0.55),
+    soundOn: makeAudio(SOUND_BASE + "notification-enable.mp3", 0.55),
+    soundOff: makeAudio(SOUND_BASE + "notification-disable.mp3", 0.55),
+    pageTurns: [
+      makeAudio(SOUND_BASE + "page-turn-01.mp3", 0.7),
+      makeAudio(SOUND_BASE + "page-turn-02.mp3", 0.7),
+      makeAudio(SOUND_BASE + "page-turn-03.mp3", 0.7),
+      makeAudio(SOUND_BASE + "page-turn-04.mp3", 0.7),
+      makeAudio(SOUND_BASE + "page-turn-05.mp3", 0.7),
+    ],
+  };
 
-    let coverShiftX = 0;
-
-    /*    EXPERIMENT — cover physics v2 (paused for launch)
-            function updateCoverMode(idx) {
-            const body = document.body;
-            const isFront = idx === 0;
-            const isBack = idx === (TOTAL_PAGES + 1);
-    
-            body.classList.toggle("is-front-cover", isFront);
-            body.classList.toggle("is-back-cover", isBack);
-            body.classList.toggle("is-cover-only", isFront || isBack);
-    
-            // shift the whole book so the cover "rests" to the correct side
-            const wrap = $("flipbook-wrap");
-            const book = $("flipbook");
-            if (!wrap || !book) return;
-    
-            const bookRect = book.getBoundingClientRect();
-            const shift = Math.round(bookRect.width * 0.22); // tweak 0.18–0.28 to taste
-    
-            coverShiftX = isFront ? +shift : isBack ? -shift : 0;
-            applyTransform();
-    
-            if (!overlay) return;
-    
-            if (isFront || isBack) {
-                overlay.style.opacity = 1;
-                overlay.style.transform = "rotateY(0deg)";
-            } else {
-                overlay.style.opacity = 0;
-            }
-     */
-}
-
-    function playSfx(key) {
+  function playSfx(key) {
     if (!soundOn) return;
     const a = SFX[key];
     if (!a) return;
     a.currentTime = 0;
-    a.play().catch(() => { });
-}
+    a.play().catch(() => {});
+  }
 
-function playRandomTurn() {
+  function playRandomTurn() {
     if (!soundOn) return;
     const a = SFX.pageTurns[Math.floor(Math.random() * SFX.pageTurns.length)];
     a.currentTime = 0;
-    a.play().catch(() => { });
-}
+    a.play().catch(() => {});
+  }
 
-function pageUrl(humanPageNum) {
+  function pageUrl(humanPageNum) {
     const n = String(humanPageNum).padStart(4, "0");
     return `${BASE}lembo_${n}.webp`;
-}
+  }
 
-// --- index <-> human mapping (because we added 2 ghost pages) ---
-// pages: [p1, ghost, p2..p238, ghost, p239]
-function idxToHuman(idx) {
-    if (idx <= 1) return 1;                 // front cover + its ghost spacer
-    if (idx >= (TOTAL_PAGES + 1)) return TOTAL_PAGES; // last ghost + back cover
-    return idx;                              // idx 2 => human 2 ... idx 238 => human 238
-}
+  // --- index <-> human mapping (because we added 2 ghost pages) ---
+  // pages: [p1, ghost, p2..p238, ghost, p239]
+  function idxToHuman(idx) {
+    if (idx <= 1) return 1;
+    if (idx >= TOTAL_PAGES + 1) return TOTAL_PAGES;
+    return idx;
+  }
 
-function humanToIdx(human) {
-    if (human <= 1) return 0;                // always land on real front cover
-    if (human >= TOTAL_PAGES) return TOTAL_PAGES + 1; // land on real back cover
-    return human;                            // human 2 => idx 2 ... human 238 => idx 238
-}
+  function humanToIdx(human) {
+    if (human <= 1) return 0;
+    if (human >= TOTAL_PAGES) return TOTAL_PAGES + 1;
+    return human;
+  }
 
-function buildPages() {
+  function buildPages() {
     const pages = [];
-
-    pages.push(pageUrl(1));
-
-    // 👻
-    pages.push(null);
-
-    for (let p = 2; p <= TOTAL_PAGES - 1; p++) {
-        pages.push(pageUrl(p));
-    }
-
-    // 👻
-    pages.push(null);
-
-    pages.push(pageUrl(TOTAL_PAGES));
-
+    pages.push(pageUrl(1));   // front cover
+    pages.push(null);         // 👻 ghost
+    for (let p = 2; p <= TOTAL_PAGES - 1; p++) pages.push(pageUrl(p));
+    pages.push(null);         // 👻 ghost
+    pages.push(pageUrl(TOTAL_PAGES)); // back cover
     console.log("pages sanity:", pages[0], pages[1], pages.at(-2), pages.at(-1), "len", pages.length);
-
     return pages;
-}
-function paintIcons() {
+  }
+
+  function paintIcons() {
     document.querySelectorAll("#flipbar img[data-ikey]").forEach((img) => {
-        const key = img.dataset.ikey;
-        if (key === "sound") img.src = soundOn ? ICONS.soundOn : ICONS.soundOff;
-        else img.src = ICONS[key] || "";
+      const key = img.dataset.ikey;
+      if (key === "sound") img.src = soundOn ? ICONS.soundOn : ICONS.soundOff;
+      else img.src = ICONS[key] || "";
     });
-}
+  }
 
-function formatPageValue(n) {
+  function formatPageValue(n) {
     return `${n} of ${TOTAL_PAGES}`;
-}
+  }
 
-function extractPageNumber(value) {
-    const match = value.match(/\d+/);
+  function extractPageNumber(value) {
+    const match = String(value || "").match(/\d+/);
     return match ? parseInt(match[0], 10) : NaN;
-}
+  }
 
-function applyStage() {
+  function applyStage() {
     if (!stageEl) return;
     const stageVar =
-        {
-            table: "var(--stage-table)",
-            parquet: "var(--stage-parquet)",
-            kitchen: "var(--stage-kitchen)",
-            basement: "var(--stage-basement)",
-            lawn: "var(--stage-lawn)",
-            cancun: "var(--stage-cancun)",
-        }[stageKey] || "var(--stage-table)";
+      {
+        table: "var(--stage-table)",
+        parquet: "var(--stage-parquet)",
+        kitchen: "var(--stage-kitchen)",
+        basement: "var(--stage-basement)",
+        lawn: "var(--stage-lawn)",
+        cancun: "var(--stage-cancun)",
+      }[stageKey] || "var(--stage-table)";
     stageEl.style.setProperty("--stage-img", stageVar);
-}
+  }
 
-function applyTransform() {
+  function applyTransform() {
     const wrap = $("flipbook-wrap");
     if (!wrap) return;
     wrap.style.transform = `translate(${panX + coverShiftX}px, ${panY}px) scale(${zoom})`;
-}
+  }
 
-
-function syncPageIndicator(humanPage) {
+  function syncPageIndicator(humanPage) {
     const pageJump = $("pageJump");
     if (!pageJump) return;
-
     if (document.activeElement !== pageJump) {
-        pageJump.value = formatPageValue(humanPage);
+      pageJump.value = formatPageValue(humanPage);
     }
-}
+  }
 
-function updatePanCursor() {
+  function updateNavLocks(human) {
+    const lock = human <= 3;
+    $("btnPrev")?.toggleAttribute("disabled", lock);
+    $("btnFirst")?.toggleAttribute("disabled", lock);
+  }
+
+  function updatePanCursor() {
     const wrap = $("flipbook-wrap");
     if (!wrap) return;
     wrap.classList.toggle("can-pan", zoom > 1);
-}
+  }
 
-function setZoom(z) {
+  function setZoom(z) {
     zoom = Math.max(0.6, Math.min(2.2, z));
     localStorage.setItem("flip:zoom", String(zoom));
     applyTransform();
     updatePanCursor();
-}
+  }
 
-function shareLink() {
+  function shareLink() {
     const url = new URL(location.href);
     url.hash = `p=${Number(localStorage.getItem("flip:page") || "1")}`;
     return url.toString();
-}
+  }
 
-function doShare() {
+  function doShare() {
     const link = shareLink();
-    if (navigator.share)
-        navigator.share({ title: document.title, url: link }).catch(() => { });
+    if (navigator.share) navigator.share({ title: document.title, url: link }).catch(() => {});
     else
-        navigator.clipboard
-            ?.writeText(link)
-            .then(() => alert("Link copied!"))
-            .catch(() => prompt("Copy this link:", link));
-}
+      navigator.clipboard
+        ?.writeText(link)
+        .then(() => alert("Link copied!"))
+        .catch(() => prompt("Copy this link:", link));
+  }
 
-function doPrintCurrent() {
+  function doPrintCurrent() {
     const page = Number(localStorage.getItem("flip:page") || "1");
     const imgSrc = pageUrl(page);
 
@@ -259,63 +220,55 @@ function doPrintCurrent() {
     w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8">');
     w.document.write("<title>Print page " + page + "</title>");
     w.document.write(
-        "<style>" +
+      "<style>" +
         "body{margin:0;display:flex;justify-content:center;align-items:center;}" +
         "img{max-width:100vw;max-height:100vh;}" +
         "</style>"
     );
     w.document.write("</head><body>");
-    w.document.write(
-        '<img id="printImg" src="' +
-        imgSrc +
-        '" alt="Page ' +
-        page +
-        '">'
-    );
+    w.document.write('<img id="printImg" src="' + imgSrc + '" alt="Page ' + page + '">');
     w.document.write("</body></html>");
     w.document.close();
 
     w.onload = () => {
-        const img = w.document.getElementById("printImg");
-        if (!img) return;
-
-        img.onload = () => {
-            w.focus();
-            w.print();
-            setTimeout(() => w.close(), 250);
-        };
-
-        if (img.complete) img.onload();
+      const img = w.document.getElementById("printImg");
+      if (!img) return;
+      img.onload = () => {
+        w.focus();
+        w.print();
+        setTimeout(() => w.close(), 250);
+      };
+      if (img.complete) img.onload();
     };
-}
+  }
 
-let tilesBuilt = false;
-function buildTilesOnce() {
+  // ---- Tiles ----
+  let tilesBuilt = false;
+  function buildTilesOnce() {
     if (tilesBuilt) return;
     const grid = $("tilesGrid");
     if (!grid) return;
 
     const frag = document.createDocumentFragment();
     for (let p = 1; p <= TOTAL_PAGES; p++) {
-        const d = document.createElement("div");
-        d.className = "tile";
-        d.innerHTML = `<img loading="lazy" src="${pageUrl(
-            p
-        )}" alt="Page ${p}">
-        <div class="n"><span>Page</span><strong>${p}</strong></div>`;
-
-        d.addEventListener("click", () => {
-            window.__flipbook?.pageFlip?.flip(humanToIdx(p));
-            $("tiles")?.classList.remove("is-open");
-        });
-
-        frag.appendChild(d);
+      const d = document.createElement("div");
+      d.className = "tile";
+      d.innerHTML = `
+        <img loading="lazy" src="${pageUrl(p)}" alt="Page ${p}">
+        <div class="n"><span>Page</span><strong>${p}</strong></div>
+      `;
+      d.addEventListener("click", () => {
+        window.__flipbook?.pageFlip?.flip(humanToIdx(p));
+        $("tiles")?.classList.remove("is-open");
+      });
+      frag.appendChild(d);
     }
     grid.appendChild(frag);
     tilesBuilt = true;
-}
+  }
 
-function wireUI() {
+  // ---- UI wiring ----
+  function wireUI() {
     paintIcons();
     applyStage();
     applyTransform();
@@ -324,317 +277,288 @@ function wireUI() {
     const wrap = $("flipbook-wrap");
 
     if (wrap) {
-        wrap.addEventListener("pointerdown", (e) => {
-            if (zoom <= 1) return;
-            isPanning = true;
-            wrap.classList.add("is-dragging");
-            console.log("drag start", wrap.className);
-            wrap.setPointerCapture(e.pointerId);
-            panSX = e.clientX;
-            panSY = e.clientY;
-            panOX = panX;
-            panOY = panY;
-        });
+      wrap.addEventListener("pointerdown", (e) => {
+        if (zoom <= 1) return;
+        isPanning = true;
+        wrap.classList.add("is-dragging");
+        wrap.setPointerCapture(e.pointerId);
+        panSX = e.clientX;
+        panSY = e.clientY;
+        panOX = panX;
+        panOY = panY;
+      });
 
-        wrap.addEventListener("pointermove", (e) => {
-            if (!isPanning) return;
-            panX = panOX + (e.clientX - panSX);
-            panY = panOY + (e.clientY - panSY);
-            applyTransform();
-        });
+      wrap.addEventListener("pointermove", (e) => {
+        if (!isPanning) return;
+        panX = panOX + (e.clientX - panSX);
+        panY = panOY + (e.clientY - panSY);
+        applyTransform();
+      });
 
-        wrap.addEventListener("pointerup", () => {
-            isPanning = false;
-            wrap.classList.remove("is-dragging");
-            console.log("drag end", wrap.className);
-        });
-
-        wrap.addEventListener("pointerleave", () => {
-            isPanning = false;
-            wrap.classList.remove("is-dragging");
-        });
-        wrap.addEventListener("pointercancel", () => {
-            isPanning = false;
-            wrap.classList.remove("is-dragging");
-        });
+      const endPan = () => {
+        isPanning = false;
+        wrap.classList.remove("is-dragging");
+      };
+      wrap.addEventListener("pointerup", endPan);
+      wrap.addEventListener("pointerleave", endPan);
+      wrap.addEventListener("pointercancel", endPan);
     }
 
-    $("btnFirst") && ($("btnFirst").onclick = () => window.__flipbook.pageFlip.flip(0));
-    $("btnPrev") && ($("btnPrev").onclick = () => window.__flipbook.pageFlip.flipPrev());
-    $("btnNext") && ($("btnNext").onclick = () => window.__flipbook.pageFlip.flipNext());
-    $("btnLast") && ($("btnLast").onclick = () => window.__flipbook.pageFlip.flip(TOTAL_PAGES + 1));
+    $("btnFirst") && ($("btnFirst").onclick = () => window.__flipbook?.pageFlip?.flip(0));
+    $("btnPrev") && ($("btnPrev").onclick = () => window.__flipbook?.pageFlip?.flipPrev());
+    $("btnNext") && ($("btnNext").onclick = () => window.__flipbook?.pageFlip?.flipNext());
+    $("btnLast") && ($("btnLast").onclick = () => window.__flipbook?.pageFlip?.flip(TOTAL_PAGES + 1));
 
     const pageJump = $("pageJump");
 
     pageJump?.addEventListener("focus", () => {
-        const n = extractPageNumber(pageJump.value);
-        if (Number.isFinite(n)) pageJump.value = String(n);
+      const n = extractPageNumber(pageJump.value);
+      if (Number.isFinite(n)) pageJump.value = String(n);
     });
 
     pageJump?.addEventListener("blur", () => {
-        const n = extractPageNumber(pageJump.value);
-        const clamped = Number.isFinite(n)
-            ? Math.max(1, Math.min(TOTAL_PAGES, n))
-            : Number(localStorage.getItem("flip:page") || 1);
-
-        pageJump.value = formatPageValue(clamped);
+      const n = extractPageNumber(pageJump.value);
+      const clamped = Number.isFinite(n)
+        ? Math.max(1, Math.min(TOTAL_PAGES, n))
+        : Number(localStorage.getItem("flip:page") || 1);
+      pageJump.value = formatPageValue(clamped);
     });
 
     pageJump?.addEventListener("keydown", (e) => {
-        if (e.key !== "Enter") return;
+      if (e.key !== "Enter") return;
+      const n = extractPageNumber(e.currentTarget.value);
+      if (!Number.isFinite(n)) return;
 
-        const n = extractPageNumber(e.currentTarget.value);
-        if (!Number.isFinite(n)) return;
-
-        const clamped = Math.max(1, Math.min(TOTAL_PAGES, n));
-        window.__flipbook.pageFlip.flip(humanToIdx(clamped));
-        localStorage.setItem("flip:page", String(clamped));
-
-        syncPageIndicator(clamped);
-        e.currentTarget.blur();
+      const clamped = Math.max(1, Math.min(TOTAL_PAGES, n));
+      window.__flipbook?.pageFlip?.flip(humanToIdx(clamped));
+      localStorage.setItem("flip:page", String(clamped));
+      syncPageIndicator(clamped);
+      updateNavLocks(clamped);
+      e.currentTarget.blur();
     });
 
     $("zoomIn") && ($("zoomIn").onclick = () => setZoom(zoom + 0.1));
     $("zoomOut") && ($("zoomOut").onclick = () => setZoom(zoom - 0.1));
 
     function centerBookVertically() {
-        const wrap = $("flipbook-wrap");
-        const book = $("flipbook");
-        if (!wrap || !book) return;
+      const wrap = $("flipbook-wrap");
+      const book = $("flipbook");
+      if (!wrap || !book) return;
 
-        const wrapRect = wrap.getBoundingClientRect();
-        const bookRect = book.getBoundingClientRect();
-
-        panY = Math.round((wrapRect.height - bookRect.height) / 2);
+      const wrapRect = wrap.getBoundingClientRect();
+      const bookRect = book.getBoundingClientRect();
+      panY = Math.round((wrapRect.height - bookRect.height) / 2);
     }
 
     function resetViewToComfort() {
-        zoom = DEFAULT_ZOOM;
-        setZoom(zoom);
-
-        panX = 0;
-        centerBookVertically();
-
-        panY += OPTICAL_NUDGE_Y;
-
-        if (typeof applyPan === "function") applyPan();
+      setZoom(DEFAULT_ZOOM);
+      panX = 0;
+      centerBookVertically();
+      panY += OPTICAL_NUDGE_Y;
+      applyTransform();
     }
 
-    $("zoomReset") && (
-        $("zoomReset").onclick = () => {
-            console.log("🔄 Reset view");
-            resetViewToComfort();
-        }
-    );
+    $("zoomReset") &&
+      ($("zoomReset").onclick = () => {
+        console.log("🔄 Reset view");
+        resetViewToComfort();
+      });
 
     $("btnTiles") &&
-        ($("btnTiles").onclick = () => {
-            $("tiles")?.classList.toggle("is-open");
-            buildTilesOnce();
-        });
+      ($("btnTiles").onclick = () => {
+        $("tiles")?.classList.toggle("is-open");
+        buildTilesOnce();
+      });
 
-    $("tilesClose") &&
-        ($("tilesClose").onclick = () => $("tiles")?.classList.remove("is-open"));
+    $("tilesClose") && ($("tilesClose").onclick = () => $("tiles")?.classList.remove("is-open"));
 
-    $("btnMore") &&
-        ($("btnMore").onclick = () => $("moreMenu")?.classList.toggle("is-open"));
+    $("btnMore") && ($("btnMore").onclick = () => $("moreMenu")?.classList.toggle("is-open"));
 
     document.addEventListener("click", (e) => {
-        if (!e.target.closest("#btnMore") && !e.target.closest("#moreMenu")) {
-            $("moreMenu")?.classList.remove("is-open");
-        }
+      if (!e.target.closest("#btnMore") && !e.target.closest("#moreMenu")) {
+        $("moreMenu")?.classList.remove("is-open");
+      }
     });
 
     $("btnShare") && ($("btnShare").onclick = doShare);
     $("btnPrint") && ($("btnPrint").onclick = doPrintCurrent);
 
     $("btnFull") &&
-        ($("btnFull").onclick = () => {
-            const stage = $("flipbook-stage");
-            if (!stage) return;
-            if (!document.fullscreenElement) stage.requestFullscreen?.();
-            else document.exitFullscreen?.();
-        });
+      ($("btnFull").onclick = () => {
+        const stage = $("flipbook-stage");
+        if (!stage) return;
+        if (!document.fullscreenElement) stage.requestFullscreen?.();
+        else document.exitFullscreen?.();
+      });
 
     $("btnSearch") && ($("btnSearch").onclick = () => alert("Search UI next step 😈"));
 
     $("btnSound") &&
-        ($("btnSound").onclick = () => {
-            soundOn = !soundOn;
-            localStorage.setItem("flip:sound", soundOn ? "1" : "0");
-            paintIcons();
-            (soundOn ? SFX.soundOn : SFX.soundOff).play().catch(() => { });
-        });
+      ($("btnSound").onclick = () => {
+        soundOn = !soundOn;
+        localStorage.setItem("flip:sound", soundOn ? "1" : "0");
+        paintIcons();
+        (soundOn ? SFX.soundOn : SFX.soundOff).play().catch(() => {});
+      });
 
-    // Stage menu wiring (optional; safe if markup not present yet)
+    // Stage menu wiring (safe if markup not present yet)
     const stageMenu = $("stageMenu");
     const btnStage = $("btnStage");
 
     function renderStageMenu() {
-        if (!stageMenu) return;
-        stageMenu.innerHTML = STAGES.map(
-            ([k, label]) =>
-                `<button type="button" data-stage="${k}">${k === stageKey ? "■" : "□"} ${label}</button>`
-        ).join("");
+      if (!stageMenu) return;
+      stageMenu.innerHTML = STAGES.map(
+        ([k, label]) =>
+          `<button type="button" data-stage="${k}">${k === stageKey ? "■" : "□"} ${label}</button>`
+      ).join("");
     }
 
     if (btnStage && stageMenu) {
+      renderStageMenu();
+
+      btnStage.onclick = () => {
+        playSfx("click");
+        stageMenu.classList.toggle("is-open");
+      };
+
+      stageMenu.addEventListener("click", (e) => {
+        const btn = e.target.closest("button[data-stage]");
+        if (!btn) return;
+        stageKey = btn.dataset.stage;
+        localStorage.setItem("flip:stage", stageKey);
+        applyStage();
         renderStageMenu();
-
-        btnStage.onclick = () => {
-            playSfx("click");
-            stageMenu.classList.toggle("is-open");
-        };
-
-        stageMenu.addEventListener("click", (e) => {
-            const btn = e.target.closest("button[data-stage]");
-            if (!btn) return;
-            stageKey = btn.dataset.stage;
-            localStorage.setItem("flip:stage", stageKey);
-            applyStage();
-            renderStageMenu();
-        });
+      });
     }
 
     // Button SFX
     function wireButtonSfx(...ids) {
-        ids.forEach((id) => {
-            const el = $(id);
-            if (!el) return;
-            el.addEventListener("pointerenter", () => playSfx("hover"));
-            el.addEventListener("click", () => playSfx("click"));
-        });
+      ids.forEach((id) => {
+        const el = $(id);
+        if (!el) return;
+        el.addEventListener("pointerenter", () => playSfx("hover"));
+        el.addEventListener("click", () => playSfx("click"));
+      });
     }
 
     wireButtonSfx(
-        "btnFirst",
-        "btnPrev",
-        "btnNext",
-        "btnLast",
-        "zoomOut",
-        "zoomIn",
-        "btnTiles",
-        "btnMore",
-        "btnShare",
-        "btnPrint",
-        "btnFull",
-        "btnSearch",
-        "btnSound",
-        "btnStage"
+      "btnFirst",
+      "btnPrev",
+      "btnNext",
+      "btnLast",
+      "zoomOut",
+      "zoomIn",
+      "btnTiles",
+      "btnMore",
+      "btnShare",
+      "btnPrint",
+      "btnFull",
+      "btnSearch",
+      "btnSound",
+      "btnStage"
     );
-}
+  }
 
-document.getElementById("startBtn")?.addEventListener("click", () => {
-    document.body.classList.add("is-reading");
-    setTimeout(() => {
-        init();                 // run your init once
-        window.__flipbook?.pageFlip?.flip(humanToIdx(3));
-        localStorage.setItem("flip:page", "3");
-        syncPageIndicator(3);
-        updateNavLocks(3);
+  // ---- Flipbook init ----
+  function init() {
+    const el = $("flipbook");
+    if (!el) return false;
+    if (!window.St?.PageFlip) return false;
+    if (el.dataset.flipInit === "1") return true;
+    el.dataset.flipInit = "1";
+
+    const pageFlip = new window.St.PageFlip(el, {
+      width: 2000,
+      height: 1680,
+      size: "stretch",
+      minWidth: 320,
+      maxWidth: 2000,
+      minHeight: 400,
+      maxHeight: 1680,
+      maxShadowOpacity: 0.18,
+      showCover: true,
+      mobileScrollSupport: true,
     });
 
-    function init() {
-        const el = $("flipbook");
-        if (!el) return false;
-        if (!window.St?.PageFlip) return false;
-        if (el.dataset.flipInit === "1") return true;
-        el.dataset.flipInit = "1";
+    const pages = buildPages();
 
-        const pageFlip = new window.St.PageFlip(el, {
-            width: 2000,
-            height: 1680,
-            size: "stretch",
-            minWidth: 320,
-            maxWidth: 2000,
-            minHeight: 400,
-            maxHeight: 1680,
-            maxShadowOpacity: 0.18,
-            showCover: true,
-            mobileScrollSupport: true,
-        });
-
-        const pages = buildPages();
-
-        console.log(
-            "pages check:",
-            pages.length,
-            pages[0],
-            pages[1],
-            pages.at(-2),
-            pages.at(-1)
-        );
-
-        const container = document.getElementById("flipbook");
-        if (!container) { console.error("❌ #flipbook not found"); return false; }
-
-        container.innerHTML = "";
-
-        pages.forEach((src, i) => {
-            const page = document.createElement("div");
-            page.className = "page";
-
-            // 👻 ghost page
-            if (!src) {
-                page.classList.add("page-ghost");
-                container.appendChild(page);
-                return;
-            }
-            // 📕 covers: first + last real pages only
-            if (i === 0 || i === pages.length - 1) {
-                page.setAttribute("data-density", "hard");
-                page.classList.add("page-cover");
-                if (i === 0) page.classList.add("page-cover-top");
-                else page.classList.add("page-cover-bottom");
-            }
-
-            // Normal page with image
-            page.innerHTML = `
-    <div class="page-content">
-      <div class="page-image" style="background-image:url('${src}')"></div>
-    </div>
-  `;
-
-            container.appendChild(page);
-        });
-
-        pageFlip.loadFromHTML(container.querySelectorAll(".page"));
-        window.__flipbook = { pageFlip };
-
-
-        // choose start page: hash beats localStorage beats 1
-        const m = location.hash.match(/p=(\d+)/);
-        const hashHuman = m ? Number(m[1]) : null;
-        const storedHuman = Number(localStorage.getItem("flip:page") || "1");
-        const desiredHuman = Number.isFinite(hashHuman) ? hashHuman : storedHuman;
-        const desiredHumanClamped = Math.max(1, Math.min(TOTAL_PAGES, desiredHuman));
-        const desiredIndex = humanToIdx(desiredHumanClamped);
-
-        pageFlip.flip(desiredIndex);
-        syncPageIndicator(desiredHumanClamped);
-        updateNavLocks(desiredHumanClamped);
-
-        pageFlip.on("flip", (e) => {
-            playRandomTurn();
-            const idx = (e.data ?? e);
-            const human = idxToHuman(idx);
-
-            localStorage.setItem("flip:page", String(human));
-            syncPageIndicator(human);
-        });
-        function updateNavLocks(human) {
-            const lock = human <= 3;
-            $("btnPrev")?.toggleAttribute("disabled", lock);
-            $("btnFirst")?.toggleAttribute("disabled", lock);
-        }
-        setTimeout(wireUI, 50);
-        return true;
+    const container = $("flipbook");
+    if (!container) {
+      console.error("❌ #flipbook not found");
+      return false;
     }
+    container.innerHTML = "";
 
-    //let tries = 0;
-    //const t = setInterval(() => {
-    //        tries++;
-    //      const ok = init();
-    //    if (ok || tries > 400) clearInterval(t);
-    //}, 50);
+    pages.forEach((src, i) => {
+      const page = document.createElement("div");
+      page.className = "page";
+
+      // 👻 ghost page
+      if (!src) {
+        page.classList.add("page-ghost");
+        container.appendChild(page);
+        return;
+      }
+
+      // covers: first + last real pages only
+      if (i === 0 || i === pages.length - 1) {
+        page.setAttribute("data-density", "hard");
+        page.classList.add("page-cover");
+        if (i === 0) page.classList.add("page-cover-top");
+        else page.classList.add("page-cover-bottom");
+      }
+
+      page.innerHTML = `
+        <div class="page-content">
+          <div class="page-image" style="background-image:url('${src}')"></div>
+        </div>
+      `;
+
+      container.appendChild(page);
+    });
+
+    pageFlip.loadFromHTML(container.querySelectorAll(".page"));
+    window.__flipbook = { pageFlip };
+
+    // choose start page: hash beats localStorage beats 1
+    const m = location.hash.match(/p=(\d+)/);
+    const hashHuman = m ? Number(m[1]) : null;
+    const storedHuman = Number(localStorage.getItem("flip:page") || "1");
+    const desiredHuman = Number.isFinite(hashHuman) ? hashHuman : storedHuman;
+    const desiredHumanClamped = Math.max(1, Math.min(TOTAL_PAGES, desiredHuman));
+    const desiredIndex = humanToIdx(desiredHumanClamped);
+
+    pageFlip.flip(desiredIndex);
+    syncPageIndicator(desiredHumanClamped);
+    updateNavLocks(desiredHumanClamped);
+
+    pageFlip.on("flip", (e) => {
+      playRandomTurn();
+      const idx = e?.data ?? e;
+      const human = idxToHuman(idx);
+      localStorage.setItem("flip:page", String(human));
+      syncPageIndicator(human);
+      updateNavLocks(human);
+    });
+
+    setTimeout(wireUI, 50);
+    return true;
+  }
+
+  // ---- Start cover button ----
+  document.getElementById("startBtn")?.addEventListener("click", () => {
+    document.body.classList.add("is-reading");
+
+    setTimeout(() => {
+      init();
+      window.__flipbook?.pageFlip?.flip(humanToIdx(3));
+      localStorage.setItem("flip:page", "3");
+      syncPageIndicator(3);
+      updateNavLocks(3);
+    }, 0);
+  });
+
+  // If you ever want auto-init without the cover screen, uncomment:
+  // setTimeout(() => init(), 0);
+
 })();
