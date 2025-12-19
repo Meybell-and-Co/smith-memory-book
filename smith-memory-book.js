@@ -101,18 +101,17 @@ console.log("✅ main script started");
     }
 
     function buildPages() {
-
         const pages = [];
 
-        pages.push(urlFor("lembo_0001.webp"));
+        pages.push(pageUrl1(1));
 
         for (let p = 2; p <= TOTAL_PAGES - 1; p++) {
             pages.push(pageUrl1(p));
         }
 
-        console.log("pages sanity:", pages[0], pages[1], pages.at(-2), pages.at(-1), "len", pages.length);
+        pages.push(pageUrl1(TOTAL_PAGES));
 
-        pages.push(urlFor("lembo_0239.webp"));
+        console.log("pages sanity:", pages[0], pages[1], pages.at(-2), pages.at(-1), "len", pages.length);
 
         return pages;
     }
