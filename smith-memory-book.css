@@ -48,14 +48,14 @@ button, input{
 #flipbook-stage .stf__parent,
 #flipbook-stage .stf__wrapper,
 #flipbook-stage .stf__block,
-#flipbook-stage canvas.stf__canvas {
+#flipbook-stage canvas.stf__canvas{
   height: 100% !important;
   width: 100% !important;
 }
 
 .stf__canvas,
 .stf__block,
-.stf__wrapper {
+.stf__wrapper{
   background: transparent !important;
 }
 
