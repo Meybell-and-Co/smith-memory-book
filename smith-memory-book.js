@@ -323,16 +323,8 @@ console.log("✅ main script started");
             e.currentTarget.blur();
         });
 
-        $("zoomReset") && (
-            $("zoomReset").onclick = () => {
-                zoom = 0.8;
-                setZoom(zoom);
-
-                panX = 0;
-                centerBookVertically();
-                applyPan?.();
-            }
-        );
+        $("zoomIn") && ($("zoomIn").onclick = () => setZoom(zoom + 0.1));
+        $("zoomOut") && ($("zoomOut").onclick = () => setZoom(zoom - 0.1));
 
         function centerBookVertically() {
             const wrap = $("flipbook-wrap");
@@ -345,7 +337,18 @@ console.log("✅ main script started");
             panY = Math.round((wrapRect.height - bookRect.height) / 2);
         }
 
-        document.title = `Zoom ${Math.round(zoom * 100)}%`;
+        $("zoomReset") && (
+            $("zoomReset").onclick = () => {
+                console.log("🔄 Reset zoom");
+                zoom = 0.8;
+                setZoom(zoom);
+
+                panX = 0;
+                centerBookVertically();
+
+                if (typeof applyPan === "function") applyPan();
+            }
+        );
 
         $("btnTiles") &&
             ($("btnTiles").onclick = () => {
