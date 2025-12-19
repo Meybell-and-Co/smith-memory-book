@@ -68,7 +68,7 @@ input {
 #flipbook-wrap::before{
   content:"";
   position:absolute;
-  inset:-6%;
+  inset:-18%;
   background: var(--book-frame) center / contain no-repeat;
   pointer-events:none;
   z-index: 0;
