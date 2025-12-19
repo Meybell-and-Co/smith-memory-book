@@ -111,6 +111,8 @@ console.log("✅ main script started");
     // Flip instance
     let pageFlip = null;
 
+    let allowBackUnder3Once = false;
+
     // ----------------------------
     // Audio
     // ----------------------------
@@ -451,6 +453,15 @@ console.log("✅ main script started");
             const idx = e?.data ?? e;
             const human = idxToHuman(idx);
 
+            if (allowBackUnder3Once && human < 3) {
+                allowBackUnder3Once = false;
+                lastHuman = human;
+                localStorage.setItem("flip:page", String(human));
+                syncPageIndicator(human);
+                updateNavLocks(human);
+                return;
+            }
+
             if (lastHuman === 3 && human < 3) {
                 isSnapBack = true;
                 setTimeout(() => {
@@ -596,6 +607,7 @@ console.log("✅ main script started");
         els.btnFirst?.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
+            allowBackUnder3Once = true;
             initFlipbookOnce();      // safe if already inited
             goToHuman(1);            // front cover
         });
