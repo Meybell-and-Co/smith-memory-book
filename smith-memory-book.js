@@ -25,7 +25,8 @@ console.log("✅ main script started");
         prev: ICON_BASE + "previous-gold.png",
         next: ICON_BASE + "next-gold.png",
         pan: ICON_BASE + "grab-open-gold.png",
-        grab: ICON_BASE + "grab-closed-gold.png"
+        grab: ICON_BASE + "grab-closed-gold.png",
+        reset: ICON_BASE + "reset-gold.png",
     };
 
     const STAGES = [
@@ -324,6 +325,19 @@ console.log("✅ main script started");
 
         $("zoomIn") && ($("zoomIn").onclick = () => setZoom(zoom + 0.1));
         $("zoomOut") && ($("zoomOut").onclick = () => setZoom(zoom - 0.1));
+
+        $("zoomReset") && (
+            $("zoomReset").onclick = () => {
+                console.log("🔄 Reset zoom");
+
+                zoom = 1;
+                setZoom(1);
+
+                panX = 0;
+                panY = 0;
+                applyPan?.();
+            }
+        );
 
         $("btnTiles") &&
             ($("btnTiles").onclick = () => {
