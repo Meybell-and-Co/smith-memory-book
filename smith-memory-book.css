@@ -80,6 +80,24 @@ input {
   z-index: 0;
 }
 
+/* When viewing ONLY a cover, hide the hardback frame/pastedown overlay */
+body.is-cover-only #flipbook-wrap::before {
+  opacity: 0 !important;
+}
+
+/* Covers: ensure the cover art fills the page area cleanly */
+.page.page-cover .page-image{
+  background-size: contain;
+}
+
+/* Ghost pages: absolutely no shadows, no rendering artifacts */
+.page.page-ghost{
+  opacity: 0 !important;
+  visibility: hidden !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
 #flipbook {
   position: relative;
   z-index: 1;

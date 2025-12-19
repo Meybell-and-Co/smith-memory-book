@@ -52,7 +52,7 @@ console.log("✅ main script started");
 
     // --- state ---
     let soundOn = (localStorage.getItem("flip:sound") ?? "1") === "1";
-    let zoom = Number(localStorage.getItem("flip:zoom") || "1");
+    let zoom = Number(localStorage.getItem("flip:zoom") || String(DEFAULT_ZOOM));
 
     let stageKey = localStorage.getItem("flip:stage") || "table";
     const stageEl = $("flipbook-stage");
@@ -80,6 +80,29 @@ console.log("✅ main script started");
         ],
     };
 
+    let coverShiftX = 0;
+
+    function updateCoverMode(idx) {
+        const body = document.body;
+        const isFront = idx === 0;
+        const isBack = idx === (TOTAL_PAGES + 1);
+
+        body.classList.toggle("is-front-cover", isFront);
+        body.classList.toggle("is-back-cover", isBack);
+        body.classList.toggle("is-cover-only", isFront || isBack);
+
+        // shift the whole book so the cover "rests" to the correct side
+        const wrap = $("flipbook-wrap");
+        const book = $("flipbook");
+        if (!wrap || !book) return;
+
+        const bookRect = book.getBoundingClientRect();
+        const shift = Math.round(bookRect.width * 0.22); // tweak 0.18–0.28 to taste
+
+        coverShiftX = isFront ? +shift : isBack ? -shift : 0;
+        applyTransform();
+    }
+
     function playSfx(key) {
         if (!soundOn) return;
         const a = SFX[key];
@@ -98,6 +121,20 @@ console.log("✅ main script started");
     function pageUrl(humanPageNum) {
         const n = String(humanPageNum).padStart(4, "0");
         return `${BASE}lembo_${n}.webp`;
+    }
+
+    // --- index <-> human mapping (because we added 2 ghost pages) ---
+    // pages: [p1, ghost, p2..p238, ghost, p239]
+    function idxToHuman(idx) {
+        if (idx <= 1) return 1;                 // front cover + its ghost spacer
+        if (idx >= (TOTAL_PAGES + 1)) return TOTAL_PAGES; // last ghost + back cover
+        return idx;                              // idx 2 => human 2 ... idx 238 => human 238
+    }
+
+    function humanToIdx(human) {
+        if (human <= 1) return 0;                // always land on real front cover
+        if (human >= TOTAL_PAGES) return TOTAL_PAGES + 1; // land on real back cover
+        return human;                            // human 2 => idx 2 ... human 238 => idx 238
     }
 
     function buildPages() {
@@ -153,10 +190,11 @@ console.log("✅ main script started");
     }
 
     function applyTransform() {
-        const wrap = $("flipbook-wrap");
-        if (!wrap) return;
-        wrap.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
-    }
+  const wrap = $("flipbook-wrap");
+  if (!wrap) return;
+  wrap.style.transform = `translate(${panX + coverShiftX}px, ${panY}px) scale(${zoom})`;
+}
+
 
     function syncPageIndicator(humanPage) {
         const pageJump = $("pageJump");
@@ -254,7 +292,7 @@ console.log("✅ main script started");
         <div class="n"><span>Page</span><strong>${p}</strong></div>`;
 
             d.addEventListener("click", () => {
-                window.__flipbook?.pageFlip?.flip(p - 1);
+                window.__flipbook?.pageFlip?.flip(humanToIdx(p));
                 $("tiles")?.classList.remove("is-open");
             });
 
@@ -309,9 +347,9 @@ console.log("✅ main script started");
         }
 
         $("btnFirst") && ($("btnFirst").onclick = () => window.__flipbook.pageFlip.flip(0));
-        $("btnLast") && ($("btnLast").onclick = () => window.__flipbook.pageFlip.flip(TOTAL_PAGES - 1));
         $("btnPrev") && ($("btnPrev").onclick = () => window.__flipbook.pageFlip.flipPrev());
         $("btnNext") && ($("btnNext").onclick = () => window.__flipbook.pageFlip.flipNext());
+        $("btnLast") && ($("btnLast").onclick = () => window.__flipbook.pageFlip.flip(TOTAL_PAGES + 1));
 
         const pageJump = $("pageJump");
 
@@ -336,7 +374,7 @@ console.log("✅ main script started");
             if (!Number.isFinite(n)) return;
 
             const clamped = Math.max(1, Math.min(TOTAL_PAGES, n));
-            window.__flipbook.pageFlip.flip(clamped - 1);
+            window.__flipbook.pageFlip.flip(humanToIdx(clamped));
             localStorage.setItem("flip:page", String(clamped));
 
             syncPageIndicator(clamped);
@@ -537,30 +575,35 @@ console.log("✅ main script started");
             container.appendChild(page);
         });
 
-    pageFlip.loadFromHTML(container.querySelectorAll(".page"));
-    window.__flipbook = { pageFlip };
+        pageFlip.loadFromHTML(container.querySelectorAll(".page"));
+        window.__flipbook = { pageFlip };
 
 
-    // choose start page: hash beats localStorage beats 1
-    const m = location.hash.match(/p=(\d+)/);
-    const hashHuman = m ? Number(m[1]) : null;
-    const storedHuman = Number(localStorage.getItem("flip:page") || "1");
-    const desiredHuman = Number.isFinite(hashHuman) ? hashHuman : storedHuman;
-    const desiredIndex = Math.max(0, Math.min(TOTAL_PAGES - 1, desiredHuman - 1));
+        // choose start page: hash beats localStorage beats 1
+        const m = location.hash.match(/p=(\d+)/);
+        const hashHuman = m ? Number(m[1]) : null;
+        const storedHuman = Number(localStorage.getItem("flip:page") || "1");
+        const desiredHuman = Number.isFinite(hashHuman) ? hashHuman : storedHuman;
+        const desiredHumanClamped = Math.max(1, Math.min(TOTAL_PAGES, desiredHuman));
+        const desiredIndex = humanToIdx(desiredHumanClamped);
 
-    pageFlip.flip(desiredIndex);
-    syncPageIndicator(desiredIndex + 1);
+        pageFlip.flip(desiredIndex);
+        syncPageIndicator(desiredHumanClamped);
+        updateCoverMode(desiredIndex);
 
-    pageFlip.on("flip", (e) => {
-        playRandomTurn();
-        const human = (e.data ?? e) + 1;
-        localStorage.setItem("flip:page", String(human));
-        syncPageIndicator(human);
-    });
+        pageFlip.on("flip", (e) => {
+            playRandomTurn();
+            const idx = (e.data ?? e);
+            const human = idxToHuman(idx);
 
-    setTimeout(wireUI, 50);
-    return true;
-}
+            localStorage.setItem("flip:page", String(human));
+            syncPageIndicator(human);
+            updateCoverMode(idx);
+        });
+
+        setTimeout(wireUI, 50);
+        return true;
+    }
 
     let tries = 0;
     const t = setInterval(() => {
