@@ -472,17 +472,23 @@ console.log("✅ main script started");
             minHeight: 400,
             maxHeight: 1680,
             maxShadowOpacity: 0.18,
-            showCover: false,
+            showCover: true,
             mobileScrollSupport: true,
         });
 
         const pages = buildPages();
-        const container = document.getElementById("flipbook");
         container.innerHTML = "";
 
-        pages.forEach((src) => {
+        pages.forEach((src, i) => {
             const page = document.createElement("div");
             page.className = "page";
+
+            if (i === 0 || i === pages.length - 1) {
+                page.setAttribute("data-density", "hard");
+                page.classList.add("page-cover");
+                if (i === 0) page.classList.add("page-cover-top");
+                else page.classList.add("page-cover-bottom");
+            }
 
             page.innerHTML = `
     <div class="page-content">
@@ -493,7 +499,7 @@ console.log("✅ main script started");
         });
 
         pageFlip.loadFromHTML(container.querySelectorAll(".page"));
-        
+
         window.__flipbook = { pageFlip };
 
         // choose start page: hash beats localStorage beats 1
