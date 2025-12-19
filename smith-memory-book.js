@@ -270,7 +270,7 @@
   function setMoreOpen(open) {
     const m = $("moreMenu");
     if (!m) return;
-    m.classList.toggle("open", !!open);
+    m.classList.toggle("is-open", !!open);
   }
 
   function toggleMore() {
