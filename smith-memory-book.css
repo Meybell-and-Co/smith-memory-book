@@ -451,9 +451,7 @@ body.is-reading #flipbook-wrap {
   position: absolute;
   inset: 0;
   z-index: 900;
-  /* under interactionShield (999), above book */
   pointer-events: none;
-  /* doesn't block clicking the book */
   display: none;
 
   background-image: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/flipbook-ui-icons/click-me-to-start.gif");
@@ -477,6 +475,15 @@ body.is-reading #flipbook-wrap {
 /* optional: subtle bob animation */
 #flipbook-stage.is-resting #startHint {
   animation: hintBob 2.2s ease-in-out infinite;
+}
+
+#flipbook-stage.is-resting #flipbook {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#flipbook-stage.is-resting #flipbook-wrap {
+  opacity: 1;
 }
 
 @keyframes hintBob {
