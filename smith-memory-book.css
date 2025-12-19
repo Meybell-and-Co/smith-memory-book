@@ -303,3 +303,20 @@ input {
 .tiles {
   user-select: none;
 }
+
+.page,
+.page .page-content,
+.page .page-image{
+  width: 100%;
+  height: 100%;
+}
+
+.page .page-content{
+  display: block;
+}
+
+.page .page-image{
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
