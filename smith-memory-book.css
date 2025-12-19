@@ -28,8 +28,8 @@ input {
   box-sizing: border-box;
   background: var(--stage-img, var(--stage-table)) center / cover no-repeat;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: center !important;
+  justify-content: center !important;
   overflow: hidden;
 }
 
