@@ -28,6 +28,7 @@ console.log("✅ main script started");
         pan: ICON_BASE + "grab-open-gold.png",
         grab: ICON_BASE + "grab-closed-gold.png",
         reset: ICON_BASE + "reset-gold.png",
+        startHint: ICON_BASE + "click-me-to-start.gif",
     };
 
     const STAGES = [
@@ -45,52 +46,52 @@ console.log("✅ main script started");
     const $ = (id) => document.getElementById(id);
 
     // --- Toast: "Hi — click to open" (resting state only, once per session) ---
-(() => {
-  const toast = $("openToast");
-  if (!toast) return;
+    (() => {
+        const toast = $("openToast");
+        if (!toast) return;
 
-  const KEY = "SMB_OPEN_TOAST_SEEN";
+        const KEY = "SMB_OPEN_TOAST_SEEN";
 
-  // Only show if we're in resting mode (not reading yet)
-  const isReading = document.body.classList.contains("is-reading");
-  if (isReading) return;
+        // Only show if we're in resting mode (not reading yet)
+        const isReading = document.body.classList.contains("is-reading");
+        if (isReading) return;
 
-  // Only once per browser tab/session
-  try {
-    if (sessionStorage.getItem(KEY) === "1") return;
-    sessionStorage.setItem(KEY, "1");
-  } catch (e) {
-    // If sessionStorage is blocked, we’ll still show once (no biggie)
-  }
+        // Only once per browser tab/session
+        try {
+            if (sessionStorage.getItem(KEY) === "1") return;
+            sessionStorage.setItem(KEY, "1");
+        } catch (e) {
+            // If sessionStorage is blocked, we’ll still show once (no biggie)
+        }
 
-  // Show
-  toast.classList.remove("is-hiding");
-  toast.classList.add("is-visible");
+        // Show
+        toast.classList.remove("is-hiding");
+        toast.classList.add("is-visible");
 
-  // Hide helper
-  const hide = () => {
-    if (!toast.classList.contains("is-visible")) return;
-    toast.classList.remove("is-visible");
-    toast.classList.add("is-hiding");
-    setTimeout(() => toast.classList.remove("is-hiding"), 300);
-  };
+        // Hide helper
+        const hide = () => {
+            if (!toast.classList.contains("is-visible")) return;
+            toast.classList.remove("is-visible");
+            toast.classList.add("is-hiding");
+            setTimeout(() => toast.classList.remove("is-hiding"), 300);
+        };
 
-  // Auto-hide after a beat
-  const t = setTimeout(hide, 3200);
+        // Auto-hide after a beat
+        const t = setTimeout(hide, 3200);
 
-  // If they click anywhere on the stage/wrap, hide immediately
-  const clickTarget =
-    $("flipbook-wrap") || $("flipbook-stage") || document.body;
+        // If they click anywhere on the stage/wrap, hide immediately
+        const clickTarget =
+            $("flipbook-wrap") || $("flipbook-stage") || document.body;
 
-  clickTarget.addEventListener(
-    "click",
-    () => {
-      clearTimeout(t);
-      hide();
-    },
-    { once: true }
-  );
-})();
+        clickTarget.addEventListener(
+            "click",
+            () => {
+                clearTimeout(t);
+                hide();
+            },
+            { once: true }
+        );
+    })();
     // ---- State ----
     let soundOn = (localStorage.getItem("flip:sound") ?? "1") === "1";
     let zoom = Number(localStorage.getItem("flip:zoom") || String(DEFAULT_ZOOM));
@@ -222,11 +223,26 @@ console.log("✅ main script started");
     }
 
     function updateNavLocks(human) {
-        const lock = human <= 3;
-        $("btnPrev")?.toggleAttribute("disabled", lock);
-        $("btnFirst")?.toggleAttribute("disabled", lock);
-    }
+        const lockBack = (human === 3); // ✅ only lock on page 3
+        const prev = $("btnPrev");
+        const first = $("btnFirst");
+        const shield = $("interactionShield");
 
+        // disable + dither the PREV button
+        if (prev) {
+            prev.toggleAttribute("disabled", lockBack);
+            prev.classList.toggle("is-disabled", lockBack);
+        }
+
+        // optional: also disable “A” while locked (but A returns to cover anyway now)
+        if (first) {
+            first.toggleAttribute("disabled", false);
+            first.classList.remove("is-disabled");
+        }
+
+        // ✅ hard stop on drag/peel-back for this page only
+        if (shield) shield.classList.toggle("is-on", lockBack);
+    }
     function updatePanCursor() {
         const wrap = $("flipbook-wrap");
         if (!wrap) return;
@@ -351,10 +367,56 @@ console.log("✅ main script started");
             wrap.addEventListener("pointercancel", endPan);
         }
 
-        $("btnFirst") && ($("btnFirst").onclick = () => window.__flipbook?.pageFlip?.flip(0));
-        $("btnPrev") && ($("btnPrev").onclick = () => window.__flipbook?.pageFlip?.flipPrev());
-        $("btnNext") && ($("btnNext").onclick = () => window.__flipbook?.pageFlip?.flipNext());
-        $("btnLast") && ($("btnLast").onclick = () => window.__flipbook?.pageFlip?.flip(TOTAL_PAGES + 1));
+        function goToStartState() {
+            // restore landing view
+            document.body.classList.remove("is-reading");
+            document.getElementById("flipbook-stage")?.classList.add("is-resting");
+
+            // hide flipbar
+            const flipbar = document.getElementById("flipbar");
+            if (flipbar) flipbar.style.display = "none";
+
+            // reset “where you start next time”
+            localStorage.setItem("flip:page", "3");
+            localStorage.setItem("flip:stage", "table"); // kitchen TABLE surface
+            location.hash = ""; // prevent hash overriding
+
+            // turn off interaction shield
+            document.getElementById("interactionShield")?.classList.remove("is-on");
+
+            // show hint again
+            const hint = document.getElementById("startHint");
+            if (hint) {
+                hint.style.display = "";
+                hint.style.opacity = "";
+                hint.style.transform = "";
+            }
+        }
+
+        // ✅ Wire A/Z here (RIGHT AFTER goToStartState)
+        document.getElementById("btnFirst")?.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            goToStartState();
+        });
+
+        document.getElementById("btnLast")?.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            goToStartState();
+        });
+
+        document.getElementById("btnPrev")?.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            window.__flipbook?.pageFlip?.flipPrev();
+        });
+
+        document.getElementById("btnNext")?.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            window.__flipbook?.pageFlip?.flipNext();
+        });
 
         const pageJump = $("pageJump");
 
@@ -592,15 +654,20 @@ console.log("✅ main script started");
         return true;
     }
 
-    document.getElementById("startBtn")?.addEventListener("click", () => {
-        // enter reading
+    document.getElementById("startBtn")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        hideStartHint();
+
+        // ✅ guarantee start page
+        localStorage.setItem("flip:page", "3");
+        location.hash = "";
+
         document.body.classList.add("is-reading");
         document.getElementById("flipbook-stage")?.classList.remove("is-resting");
 
-        // force default stage: kitchen TABLE surface (your "tabletop.webp")
-        localStorage.setItem("flip:stage", "table");
-
-        // show flipbar + animate in
+        // show flipbar + animate in (slower now via CSS)
         const flipbar = document.getElementById("flipbar");
         if (flipbar) {
             flipbar.style.display = "";
@@ -609,24 +676,14 @@ console.log("✅ main script started");
             flipbar.classList.add("is-entering");
         }
 
-        // toast: hide immediately on entry + mark seen
-        const toast = document.getElementById("openToast");
-        try { sessionStorage.setItem("SMB_OPEN_TOAST_SEEN", "1"); } catch (e) { }
-        if (toast) {
-            toast.classList.remove("is-visible");
-            toast.classList.add("is-hiding");
-            setTimeout(() => toast.classList.remove("is-hiding"), 300);
-        }
-
+        // ✅ give the fade a beat
         setTimeout(() => {
             init();
             window.__flipbook?.pageFlip?.flip(humanToIdx(3));
-            localStorage.setItem("flip:page", "3");
             syncPageIndicator(3);
             updateNavLocks(3);
-        }, 0);
+        }, 550);
     });
-
 
     // If you ever want auto-init without the cover screen, uncomment:
     // setTimeout(() => init(), 0);
@@ -676,6 +733,26 @@ console.log("✅ main script started");
     const btnFirst = $(BTN_FIRST_ID);
     const btnLast = $(BTN_LAST_ID);
     const btnPrev = $(BTN_PREV_ID);
+
+    function hideStartHint() {
+        const hint = document.getElementById("startHint");
+        if (!hint) return;
+        hint.style.opacity = "0";
+        hint.style.transform = "translateY(6px)";
+        setTimeout(() => (hint.style.display = "none"), 250);
+    }
+
+    // If you enter reading via start button:
+    document.getElementById("startBtn")?.addEventListener("click", () => {
+        hideStartHint();
+    });
+
+    // If you also allow clicking the stage/wrap to enter:
+    (document.getElementById("flipbook-wrap") || document.getElementById("flipbook-stage"))
+        ?.addEventListener("click", () => {
+            // only hide if we're actually transitioning to reading
+            if (!document.body.classList.contains("is-reading")) hideStartHint();
+        }, { once: true });
 
     // if we can't find the stage, bail silently
     if (!stageEl) return;
@@ -818,6 +895,10 @@ console.log("✅ main script started");
 
     const clickTarget = wrapEl || stageEl;
     clickTarget.addEventListener("click", function (e) {
+
+        // ❌ Ignore clicks coming from the start screen / start button
+        if (document.getElementById("startScreen")?.contains(e.target)) return;
+        if (e.target.id === "startBtn") return;
 
         if (flipbar && flipbar.contains(e.target)) return;
 

@@ -22,6 +22,7 @@
         <button id="startBtn" type="button" aria-label="Open Book"></button>
       </div>
       <div id="flipbook-wrap">
+        <div id="startHint" aria-hidden="true"></div>
         <div id="interactionShield" aria-hidden="true"></div>
         <div id="flipbook"></div>
         <div id="cover-inside-overlay"></div>
@@ -93,10 +94,6 @@
         <button id="btnSearch" type="button"><img data-ikey="search" alt="" />Search</button>
         <div id="stageMenu" class="stagemenu"></div>
       </div>
-
-      <!-- ✅ Toast lives OUTSIDE the menu -->
-      <div id="openToast" aria-live="polite">Hello. Click to begin</div>
-
     </div>
   </div>
 </body>
