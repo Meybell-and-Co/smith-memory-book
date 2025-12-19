@@ -314,6 +314,60 @@ console.log("🔥 SMB SNAPSHOT: for-chad-gpt set");
                 (soundOn ? SFX.soundOn : SFX.soundOff).play().catch(() => { });
             });
 
+        // --- Click-to-edit page indicator (jump) ---
+        (function enablePageIndicatorJump() {
+            const ind = $("pageIndicator");
+            if (!ind) return;
+
+            const startEditing = () => {
+                if (ind.classList.contains("is-editing")) return;
+                ind.classList.add("is-editing");
+
+                // current human page from storage (fallback 1)
+                const current = Number(localStorage.getItem("flip:page") || "1");
+
+                ind.innerHTML = `<input id="pageIndicatorInput" inputmode="numeric" pattern="[0-9]*" />`;
+                const inp = $("pageIndicatorInput");
+                if (!inp) return;
+
+                inp.value = String(current);
+                inp.focus();
+                inp.select();
+
+                const finish = (doJump) => {
+                    const raw = inp.value.trim();
+                    ind.classList.remove("is-editing");
+
+                    if (!doJump) {
+                        setPageIndicator(current);
+                        return;
+                    }
+
+                    const n = parseInt(raw, 10);
+                    const targetHuman = Number.isFinite(n)
+                        ? Math.max(1, Math.min(TOTAL_PAGES, n))
+                        : current;
+
+                    // flip uses 0-based index
+                    window.__flipbook?.pageFlip?.flip(targetHuman - 1);
+                    // indicator will update from your flip handler; but we can also update immediately:
+                    setPageIndicator(targetHuman);
+                };
+
+                inp.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter") finish(true);
+                    if (e.key === "Escape") finish(false);
+                });
+
+                inp.addEventListener("blur", () => finish(true));
+            };
+
+            ind.addEventListener("click", (e) => {
+                e.stopPropagation();
+                startEditing();
+            });
+        })();
+
         // Stage menu wiring (optional; safe if markup not present yet)
         const stageMenu = $("stageMenu");
         const btnStage = $("btnStage");
