@@ -63,6 +63,7 @@ input {
 #flipbook-wrap {
   width: 100%;
   height: 100%;
+  top: -20px;
   max-width: none;
   max-height: none;
   display: flex;
