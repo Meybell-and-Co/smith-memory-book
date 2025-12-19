@@ -39,7 +39,7 @@ console.log("✅ main script started");
     ];
 
     const DEFAULT_ZOOM = 0.8;
-    const OPTICAL_NUDGE_Y = 20;
+    const OPTICAL_NUDGE_Y = +20;
 
     const $ = (id) => document.getElementById(id);
 
