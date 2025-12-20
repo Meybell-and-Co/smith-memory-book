@@ -16,7 +16,8 @@ console.log("✅ main script started");
         zoomIn: ICON_BASE + "add-gold.png",
         zoomOut: ICON_BASE + "subtract-gold.png",
         tiles: ICON_BASE + "tiles-gold.png",
-        search: ICON_BASE + "search-gold.png",
+        // MVP Note: we're not doing JSON mapping for an MVP product. //
+        // search: ICON_BASE + "search-gold.png", //
         share: ICON_BASE + "share-gold.png",
         print: ICON_BASE + "print-gold.png",
         fullscreen: ICON_BASE + "maximize-gold.png",
@@ -85,7 +86,8 @@ console.log("✅ main script started");
         btnShare: $("btnShare"),
         btnDownload: $("btnDownload"),
         btnFull: $("btnFull"),
-        btnSearch: $("btnSearch"),
+        // MVP Note: we're not doing JSON mapping for an MVP product. //
+        // btnSearch: $("btnSearch"),
         btnSound: $("btnSound"),
         btnStage: $("btnStage"),
         stageMenu: $("stageMenu"),
@@ -765,7 +767,7 @@ console.log("✅ main script started");
             }
         });
 
-        // Share/Print/Full/Search/Sound
+        // Share/Print/Full/Sound
         els.btnShare && (els.btnShare.onclick = doShare);
         els.btnDownload && (els.btnDownload.onclick = openPdfModal);
 
@@ -777,7 +779,11 @@ console.log("✅ main script started");
                 else document.exitFullscreen?.();
             });
 
-        els.btnSearch && (els.btnSearch.onclick = () => alert("Search UI next step 😈"));
+        /* MVP NOTE:
+Search intentionally disabled.
+Requires page → content mapping (JSON).
+*/
+        // els.btnSearch && (els.btnSearch.onclick = () => alert("Search UI next step 😈"));
 
         els.btnSound &&
             (els.btnSound.onclick = () => {
@@ -836,7 +842,8 @@ console.log("✅ main script started");
             "btnShare",
             "btnDownload",
             "btnFull",
-            "btnSearch",
+            // MVP Note: we're not doing JSON mapping for an MVP product. //
+            // "btnSearch",
             "btnSound",
             "btnStage"
         );

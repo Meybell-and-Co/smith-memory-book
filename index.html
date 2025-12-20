@@ -9,8 +9,8 @@
   <script src="vendor/stpageflip/page-flip.browser.js" onload="console.log('✅ PageFlip loaded (local vendor)')"
     onerror="console.error('❌ PageFlip failed to load (local vendor)')"></script>
 
-  <link rel="stylesheet" href="smith-memory-book.css" />
-  <script defer src="smith-memory-book.js"></script>
+  <link rel="stylesheet" href="smith-memory-book.css?v=20251220-2" />
+  <script defer src="smith-memory-book.js?v=20251220-2"></script>
 
 </head>
 
@@ -89,7 +89,8 @@
         <button id="btnStage" type="button"><img data-ikey="pan" alt="" />Stage</button>
         <button id="btnDownload" type="button"><img data-ikey="download" alt="" />Download</button>
         <button id="btnFull" type="button"><img data-ikey="fullscreen" alt="" />Full Screen</button>
-        <button id="btnSearch" type="button"><img data-ikey="search" alt="" />Search</button>
+        <!-- MVP Note: Disabled search UI will require JSON mapping and ain't nobody got time fodat 🥤 -->
+        <!-- <button id="btnSearch" type="button"><img data-ikey="search" alt="" />Search</button> -->
         <div id="stageMenu" class="stagemenu"></div>
       </div>
     </div>
