@@ -524,7 +524,7 @@ body.is-end-state #startHint {
   inset: auto;
   right: 50%;
   bottom: 14%;
-  transform: translateX(-40%)translateY(6px);
+  transform: translateX(-65%)translateY(6px);
 
   width: 180px;
   height: 180px;
