@@ -849,6 +849,7 @@ console.log("✅ main script started");
         localStorage.setItem("flip:stage", DEFAULT_STAGE_KEY);
 
         if (els.startScreen) els.startScreen.style.display = "";
+
         showStartHint();
         syncCoverArt();
 
