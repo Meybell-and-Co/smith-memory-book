@@ -109,7 +109,6 @@ console.log("✅ main script started");
     // PDF modal focus return (runtime state)
     let lastPdfOpenerEl = null;
 
-
     let panX = 0,
         panY = 0;
     let isPanning = false,
@@ -172,7 +171,7 @@ console.log("✅ main script started");
     // ----------------------------
     function pageUrl(humanPageNum) {
         const n = String(humanPageNum).padStart(4, "0");
-          return `${BASE}${PAGE_PREFIX}${n}${PAGE_EXT}`;
+        return `${BASE}${PAGE_PREFIX}${n}${PAGE_EXT}`;
     }
 
     function idxToHuman(idx) {
@@ -209,6 +208,12 @@ console.log("✅ main script started");
             if (key === "sound") img.src = soundOn ? ICONS.soundOn : ICONS.soundOff;
             else img.src = ICONS[key] || "";
         });
+    }
+
+    function updateStageIcon(open = false) {
+        const icon = document.getElementById("iconStage");
+        if (!icon) return;
+        icon.src = open ? ICONS.stageactive : ICONS.stagebefore;
     }
 
     function applyStage() {
@@ -799,27 +804,48 @@ Requires page → content mapping (JSON).
                 (soundOn ? SFX.soundOn : SFX.soundOff).play().catch(() => { });
             });
 
+        // ----------------------------
         // Stage menu
-        function renderstageSubmenu() {
+        // ----------------------------
+        function renderStageSubmenu() {
             if (!els.stageSubmenu) return;
-            els.stageSubmenu.innerHTML = STAGES.map(
-                ([key, label, emoji]) =>
-                    `<button type="button" class="stage-item" data-stage="${key}">
-      <span class="label">${label}</span>
-      <span class="emoji">${emoji}</span>
-     </button>`
-            ).join("");
 
+            els.stageSubmenu.innerHTML = STAGES.map(
+                ([key, label, emoji]) => `
+      <button type="button" class="stage-item" data-stage="${key}">
+        <span class="label">${label}</span>
+        <span class="emoji">${emoji}</span>
+      </button>`
+            ).join("");
         }
 
         if (els.btnStage && els.stageSubmenu) {
             renderStageSubmenu();
+            updateStageIcon(false); // closed by default
 
             els.btnStage.onclick = () => {
                 playSfx("click");
+                const willOpen = els.stageSubmenu.hidden;   // if hidden now, we are about to open
                 els.stageSubmenu.hidden = !els.stageSubmenu.hidden;
+                updateStageIcon(willOpen);                  // open => stageactive, closed => stagebefore
+                els.btnStage.setAttribute("aria-expanded", String(willOpen));
             };
         }
+
+        els.stageSubmenu?.addEventListener("click", (e) => {
+            const btn = e.target.closest("button[data-stage]");
+            if (!btn) return;
+
+            stageKey = btn.dataset.stage;
+            localStorage.setItem("flip:stage", stageKey);
+            applyStage();
+
+            // Optional: close after selecting (feels nicer)
+            els.stageSubmenu.hidden = true;
+            updateStageIcon(false);
+            els.btnStage?.setAttribute("aria-expanded", "false");
+        });
+
 
         els.stageSubmenu.addEventListener("click", (e) => {
             const btn = e.target.closest("button[data-stage]");
@@ -871,7 +897,7 @@ Requires page → content mapping (JSON).
         document.body.classList.remove("is-reading");
         document.body.classList.add("is-cover-only");
         document.body.classList.remove("is-end-state");
-        elsstage?.classList.add("is-resting");
+        els.stage?.classList.add("is-resting");
         syncCoverArt();
 
         setFlipbarVisible(false);
