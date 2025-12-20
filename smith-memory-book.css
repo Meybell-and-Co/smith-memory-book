@@ -522,7 +522,7 @@ body.is-end-state #startHint {
   pointer-events: none;
 
   inset: auto;
-  right: 50%;
+  right: 30%;
   bottom: 14%;
   transform: translateX(-65%)translateY(6px);
 
