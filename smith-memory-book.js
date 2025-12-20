@@ -838,8 +838,9 @@ console.log("✅ main script started");
         updatePanCursor();
 
         document.body.classList.remove("is-reading");
-        els.stage?.classList.add("is-resting");
+        document.body.classList.add("is-cover-only");
         document.body.classList.remove("is-end-state");
+        els.stage?.classList.add("is-resting");
         syncCoverArt();
 
         setFlipbarVisible(false);
@@ -847,6 +848,7 @@ console.log("✅ main script started");
         localStorage.setItem("flip:page", String(START_HUMAN_PAGE));
         localStorage.setItem("flip:stage", DEFAULT_STAGE_KEY);
 
+        if (els.startScreen) els.startScreen.style.display = "";
         showStartHint();
         syncCoverArt();
 

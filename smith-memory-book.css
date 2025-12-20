@@ -51,6 +51,26 @@ input {
   overflow: hidden;
 }
 
+/* Dim tabletop ONLY in cover-only (start + end) */
+#flipbook-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  /* “semi-transparent tabletop” look: slightly frosted/dim */
+  background: rgba(255, 255, 255, 0.28);
+}
+
+body.is-cover-only #flipbook-stage::after {
+  opacity: 1;
+}
+
+body.is-reading #flipbook-stage::after {
+  opacity: 0;
+}
+
 /* ----------------------------
    Stage menu
 ---------------------------- */
@@ -132,14 +152,6 @@ body.is-cover-only #flipbook-wrap {
 body.is-cover-only #startBtn {
   width: min(980px, 94vw);
   max-height: min(84vh, 820px);
-}
-
-/* ----------------------------
-   Cover-only (start + end)
----------------------------- */
-body.is-cover-only #flipbook-stage {
-  background: #111;
-  /* neutral void */
 }
 
 body.is-cover-only #flipbook-wrap::before {
