@@ -925,55 +925,54 @@ console.log("✅ main script started");
         modal.setAttribute("inert", ""); // put it to sleep
         document.documentElement.style.overflow = "";
     }
-}
 
     function triggerDownload(url) {
-    // reliable across browsers; your host controls whether it downloads vs previews
-    window.open(url, "_blank", "noopener,noreferrer");
-}
+        // reliable across browsers; your host controls whether it downloads vs previews
+        window.open(url, "_blank", "noopener,noreferrer");
+    }
 
-function bindPdfModalOnce() {
-    const modal = document.getElementById("pdfModal");
-    const mamaBtn = document.getElementById("pdfMamaBtn");
-    const papaBtn = document.getElementById("pdfPapaBtn");
-    const mamaSize = document.getElementById("pdfMamaSize");
-    const papaSize = document.getElementById("pdfPapaSize");
+    function bindPdfModalOnce() {
+        const modal = document.getElementById("pdfModal");
+        const mamaBtn = document.getElementById("pdfMamaBtn");
+        const papaBtn = document.getElementById("pdfPapaBtn");
+        const mamaSize = document.getElementById("pdfMamaSize");
+        const papaSize = document.getElementById("pdfPapaSize");
 
 
-    if (!modal || !mamaBtn || !papaBtn) return;
+        if (!modal || !mamaBtn || !papaBtn) return;
 
-    if (mamaSize) mamaSize.textContent = PDFS.mama.label;
-    if (papaSize) papaSize.textContent = PDFS.papa.label;
+        if (mamaSize) mamaSize.textContent = PDFS.mama.label;
+        if (papaSize) papaSize.textContent = PDFS.papa.label;
 
-    // Close on backdrop / X
-    modal.addEventListener("click", (e) => {
-        if (e.target && e.target.hasAttribute("data-pdf-close")) closePdfModal();
-    });
+        // Close on backdrop / X
+        modal.addEventListener("click", (e) => {
+            if (e.target && e.target.hasAttribute("data-pdf-close")) closePdfModal();
+        });
 
-    // Close on Esc
-    document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && modal.classList.contains("is-open")) closePdfModal();
-    });
+        // Close on Esc
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && modal.classList.contains("is-open")) closePdfModal();
+        });
 
-    // Buttons
-    mamaBtn.addEventListener("click", () => {
-        console.log("MAMA URL:", PDFS?.mama?.url);
-        closePdfModal();
-        triggerDownload(PDFS.mama.url);
-    });
+        // Buttons
+        mamaBtn.addEventListener("click", () => {
+            console.log("MAMA URL:", PDFS?.mama?.url);
+            closePdfModal();
+            triggerDownload(PDFS.mama.url);
+        });
 
-    papaBtn.addEventListener("click", () => {
-        console.log("PAPA URL:", PDFS?.papa?.url);
+        papaBtn.addEventListener("click", () => {
+            console.log("PAPA URL:", PDFS?.papa?.url);
 
-        const ok = window.confirm(PDFS.papa.confirmText);
-        if (!ok) return;
+            const ok = window.confirm(PDFS.papa.confirmText);
+            if (!ok) return;
 
-        closePdfModal();
-        triggerDownload(PDFS.papa.url);
-    });
-}
+            closePdfModal();
+            triggerDownload(PDFS.papa.url);
+        });
+    }
 
-// Call once after DOM exists
-bindPdfModalOnce();
+    // Call once after DOM exists
+    bindPdfModalOnce();
 
-}) ();
+})();
