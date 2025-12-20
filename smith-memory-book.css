@@ -116,9 +116,22 @@ body.is-cover-only #flipbook-wrap {
   opacity: 0 !important;
 }
 
-body.is-cover-only #startBtn{
+body.is-cover-only #startBtn {
   width: min(980px, 94vw);
   max-height: min(84vh, 820px);
+}
+
+/* ----------------------------
+   Cover-only (start + end)
+---------------------------- */
+body.is-cover-only #flipbook-stage {
+  background: #111;
+  /* neutral void */
+}
+
+body.is-cover-only #flipbook-wrap::before {
+  display: none !important;
+  /* kill book frame */
 }
 
 /* ----------------------------
