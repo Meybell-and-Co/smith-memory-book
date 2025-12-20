@@ -407,6 +407,8 @@ console.log("✅ main script started");
             maxShadowOpacity: 0.18,
             showCover: true,
             mobileScrollSupport: true,
+            showPageCorners: true,
+            useMouseEvents: true,
         });
 
         const pages = buildPages();
@@ -509,7 +511,7 @@ console.log("✅ main script started");
         localStorage.setItem("flip:stage", DEFAULT_STAGE_KEY);
         location.hash = "";
         allowBackUnder3Once = false;
-        
+
         // hide hint & start screen
         SMB.hideStartHint();
         if (els.startScreen) els.startScreen.style.display = "none";
