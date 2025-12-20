@@ -541,6 +541,7 @@ console.log("✅ main script started");
         const target = isEnd ? pageUrl(TOTAL_PAGES) : pageUrl(1);
 
         els.startBtn.style.backgroundImage = `url("${target}")`;
+        console.log("🟦 syncCoverArt", { target, startBtn: !!els.startBtn });
 
         // TRUTH SERUM
         const inlineBg = els.startBtn.getAttribute("style") || "";
@@ -649,6 +650,39 @@ console.log("✅ main script started");
     // ----------------------------
     // Wire UI (once)
     // ----------------------------
+
+    function bootRestingState() {
+        console.log("🟩 bootRestingState running", {
+            startBtn: !!els.startBtn,
+            stage: !!els.stage,
+            body: document.body.className
+        });
+        
+        applyStage();
+        paintIcons();
+        applyTransform();
+        updatePanCursor();
+
+        document.body.classList.remove("is-reading");
+        document.body.classList.add("is-cover-only");
+        document.body.classList.remove("is-end-state");
+        els.stage?.classList.add("is-resting");
+        syncCoverArt();
+
+        setFlipbarVisible(false);
+
+        localStorage.setItem("flip:page", String(START_HUMAN_PAGE));
+        localStorage.setItem("flip:stage", DEFAULT_STAGE_KEY);
+
+        if (els.startScreen) els.startScreen.style.display = "";
+
+        showStartHint();
+        syncCoverArt();
+
+        syncPageIndicator(START_HUMAN_PAGE);
+        updateNavLocks(START_HUMAN_PAGE);
+    }
+
     function wireUIOnce() {
         paintIcons();
         applyStage();
@@ -927,31 +961,6 @@ Requires page → content mapping (JSON).
         // ----------------------------
         // Boot: ensure true resting state
         // ----------------------------
-        function bootRestingState() {
-            applyStage();
-            paintIcons();
-            applyTransform();
-            updatePanCursor();
-
-            document.body.classList.remove("is-reading");
-            document.body.classList.add("is-cover-only");
-            document.body.classList.remove("is-end-state");
-            els.stage?.classList.add("is-resting");
-            syncCoverArt();
-
-            setFlipbarVisible(false);
-
-            localStorage.setItem("flip:page", String(START_HUMAN_PAGE));
-            localStorage.setItem("flip:stage", DEFAULT_STAGE_KEY);
-
-            if (els.startScreen) els.startScreen.style.display = "";
-
-            showStartHint();
-            syncCoverArt();
-
-            syncPageIndicator(START_HUMAN_PAGE);
-            updateNavLocks(START_HUMAN_PAGE);
-        }
 
         // ----------------------------
         // PDF Download (Mama/Papa)
@@ -1061,6 +1070,12 @@ Requires page → content mapping (JSON).
     // ----------------------------
     // Initial boot (ONCE)
     // ----------------------------
-    wireUIOnce();
-    bootRestingState();
+
+    // --- Boot once, after DOM is ready ---
+    document.addEventListener("DOMContentLoaded", () => {
+        console.log("✅ DOM ready → booting resting state");
+        wireUIOnce();
+        bootRestingState();
+    });
+
 }());

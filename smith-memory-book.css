@@ -221,6 +221,14 @@ body.is-cover-only #flipbook-wrap::before {
   background-repeat: no-repeat;
 }
 
+#startBtn {
+  background-image: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/pages/lembo_0001.webp");
+}
+
+body.is-end-state #startBtn {
+  background-image: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/pages/lembo_0239.webp");
+}
+
 body.is-reading #startScreen {
   opacity: 0;
   pointer-events: none;
