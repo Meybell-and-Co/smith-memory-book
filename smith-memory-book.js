@@ -876,11 +876,11 @@ console.log("✅ main script started");
 // ----------------------------
 const PDFS = {
   mama: {
-    url: "PASTE_MAMA_BEAR_PDF_URL_HERE",
+    url: "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/guest-user-copies/Dear-Little-Home-Hi-Res.pdf",
     label: "~140 MB",
   },
   papa: {
-    url: "PASTE_PAPA_BEAR_PDF_URL_HERE",
+    url: "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/guest-user-copies/Dear-Little-Home-Hi-Res.pdf",
     label: "~900 MB",
     confirmText:
       "This is a very large file (~900 MB).\n\nBest on desktop + fast Wi-Fi.\n\nDownload anyway?",
