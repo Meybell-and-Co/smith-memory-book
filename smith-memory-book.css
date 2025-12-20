@@ -167,7 +167,7 @@ body.is-cover-only #flipbook-wrap::before {
 }
 
 #startBtn {
-  width: min(980px, 94vw);
+  width: min(780px, 92vw);
   aspect-ratio: 4000 / 3778;
   border: 0;
   height: auto;
@@ -522,7 +522,7 @@ body.is-end-state #startHint {
   pointer-events: none;
 
   inset: auto;
-  right: 12%;
+  right: 50%;
   bottom: 14%;
 
   width: 180px;
