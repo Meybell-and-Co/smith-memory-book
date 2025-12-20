@@ -63,7 +63,6 @@ console.log("✅ main script started");
         startBtn: $("startBtn"),
         startScreen: $("startScreen"),
         startHint: $("startHint"),
-        shield: $("interactionShield"),
 
         // Nav
         btnFirst: $("btnFirst"),
@@ -111,6 +110,7 @@ console.log("✅ main script started");
     // Flip instance
     let pageFlip = null;
 
+    // One-time exception (only use if you ever add an explicit "go to cover" action)
     let allowBackUnder3Once = false;
 
     // ----------------------------
@@ -267,7 +267,7 @@ console.log("✅ main script started");
     // Locking rules (your spec)
     // Lock ONLY on human page 3:
     // - disable PREV
-    // - enable interaction shield (blocks peel/drag)
+    // - (no overlay shield; we block left-half interactions via capture listener)
     // ----------------------------
     function updateNavLocks(human) {
         const lockBack = human === START_HUMAN_PAGE;
@@ -275,9 +275,6 @@ console.log("✅ main script started");
         if (els.btnPrev) {
             els.btnPrev.toggleAttribute("disabled", lockBack);
             els.btnPrev.classList.toggle("is-disabled", lockBack);
-        }
-        if (els.shield) {
-            els.shield.classList.toggle("is-on", lockBack);
         }
     }
 
@@ -311,8 +308,7 @@ console.log("✅ main script started");
 
     function doShare() {
         const link = shareLink();
-        if (navigator.share)
-            navigator.share({ title: document.title, url: link }).catch(() => { });
+        if (navigator.share) navigator.share({ title: document.title, url: link }).catch(() => { });
         else
             navigator.clipboard
                 ?.writeText(link)
@@ -337,13 +333,7 @@ console.log("✅ main script started");
             "</style>"
         );
         w.document.write("</head><body>");
-        w.document.write(
-            '<img id="printImg" src="' +
-            imgSrc +
-            '" alt="Page ' +
-            human +
-            '">'
-        );
+        w.document.write('<img id="printImg" src="' + imgSrc + '" alt="Page ' + human + '">');
         w.document.write("</body></html>");
         w.document.close();
 
@@ -375,7 +365,7 @@ console.log("✅ main script started");
         <div class="n"><strong>${p}</strong></div>
       `;
             d.addEventListener("click", () => {
-                pageFlip?.flip(humanToIdx(p));
+                goToHuman(p);
                 els.tiles?.classList.remove("is-open");
             });
             frag.appendChild(d);
@@ -445,8 +435,6 @@ console.log("✅ main script started");
 
         let isSnapBack = false;
 
-        let lastHuman = Number(localStorage.getItem("flip:page") || "3");
-
         pageFlip.on("flip", (e) => {
             if (isSnapBack) return;
 
@@ -455,30 +443,24 @@ console.log("✅ main script started");
             const idx = e?.data ?? e;
             const human = idxToHuman(idx);
 
-            if (allowBackUnder3Once && human < 3) {
-                allowBackUnder3Once = false;
-                lastHuman = human;
-                localStorage.setItem("flip:page", String(human));
-                syncPageIndicator(human);
-                updateNavLocks(human);
-                return;
-            }
-
-            if (lastHuman === 3 && human < 3) {
+            // HARD RULE: never allow human < START_HUMAN_PAGE unless explicitly allowed once
+            if (!allowBackUnder3Once && human < START_HUMAN_PAGE) {
                 isSnapBack = true;
                 setTimeout(() => {
-                    pageFlip.flip(humanToIdx(3));
-                    localStorage.setItem("flip:page", "3");
-                    syncPageIndicator(3);
-                    updateNavLocks(3);
+                    pageFlip.flip(humanToIdx(START_HUMAN_PAGE));
+                    localStorage.setItem("flip:page", String(START_HUMAN_PAGE));
+                    syncPageIndicator(START_HUMAN_PAGE);
+                    updateNavLocks(START_HUMAN_PAGE);
                     isSnapBack = false;
                 }, 0);
-
-                lastHuman = 3;
                 return;
             }
 
-            lastHuman = human;
+            // consume exception if it was used
+            if (allowBackUnder3Once && human < START_HUMAN_PAGE) {
+                allowBackUnder3Once = false;
+            }
+
             localStorage.setItem("flip:page", String(human));
             syncPageIndicator(human);
             updateNavLocks(human);
@@ -488,7 +470,15 @@ console.log("✅ main script started");
     }
 
     function goToHuman(human) {
-        const clamped = Math.max(1, Math.min(TOTAL_PAGES, human));
+        let clamped = Math.max(1, Math.min(TOTAL_PAGES, human));
+
+        if (!allowBackUnder3Once && clamped < START_HUMAN_PAGE) {
+            clamped = START_HUMAN_PAGE;
+        }
+        if (allowBackUnder3Once && clamped < START_HUMAN_PAGE) {
+            allowBackUnder3Once = false; // consume it
+        }
+
         localStorage.setItem("flip:page", String(clamped));
         pageFlip?.flip(humanToIdx(clamped));
         syncPageIndicator(clamped);
@@ -548,9 +538,6 @@ console.log("✅ main script started");
         localStorage.setItem("flip:stage", DEFAULT_STAGE_KEY);
         location.hash = "";
 
-        // disable shield
-        els.shield?.classList.remove("is-on");
-
         // show start UI
         if (els.startScreen) els.startScreen.style.display = "";
         showStartHint();
@@ -568,11 +555,34 @@ console.log("✅ main script started");
         applyStage();
         setFlipbarVisible(false); // resting default
 
+        function currentHuman() {
+            return Number(localStorage.getItem("flip:page") || String(START_HUMAN_PAGE));
+        }
+
+        // Block ONLY interactions that begin on LEFT half while on page 3
+        // (Preserves hover/magnet behavior for PageFlip)
+        function blockBackPeelOnStartPage(e) {
+            if (currentHuman() !== START_HUMAN_PAGE) return;
+            if (!els.book) return;
+
+            const r = els.book.getBoundingClientRect();
+            const x = e.clientX - r.left;
+
+            if (x < r.width / 2) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation?.();
+                return false;
+            }
+        }
+
+        ["pointerdown", "mousedown", "touchstart"].forEach((evt) => {
+            els.book?.addEventListener(evt, blockBackPeelOnStartPage, true);
+        });
+
         // Panning
         if (els.wrap) {
             els.wrap.addEventListener("pointerdown", (e) => {
-                // Block panning if shield is on or zoom <= 1
-                if (els.shield?.classList.contains("is-on")) return;
                 if (zoom <= 1) return;
                 isPanning = true;
                 els.wrap.classList.add("is-dragging");
@@ -606,8 +616,7 @@ console.log("✅ main script started");
             enterReadingMode();
         });
 
-        // A/Z return to start state (identical)
-        // Bookends: |< and >| go to covers (NOT resting state)
+        // Home / End
         els.btnFirst?.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -617,8 +626,8 @@ console.log("✅ main script started");
         els.btnLast?.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
-            initFlipbookOnce();      // safe if already inited
-            goToHuman(TOTAL_PAGES);  // back cover (239)
+            initFlipbookOnce();
+            goToHuman(TOTAL_PAGES);
         });
 
         // Prev / Next
@@ -631,30 +640,6 @@ console.log("✅ main script started");
         els.btnPrev?.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
-
-            const human = Number(localStorage.getItem("flip:page") || "1");
-
-            if (human <= 1) {
-                document.body.classList.remove("is-reading");
-                document.getElementById("flipbook-stage")?.classList.add("is-resting");
-
-                const flipbar = document.getElementById("flipbar");
-                if (flipbar) flipbar.style.display = "none";
-
-                document.getElementById("interactionShield")?.classList.remove("is-on");
-
-                const hint = document.getElementById("startHint");
-                if (hint) {
-                    hint.style.display = "none";
-                    hint.style.opacity = "0";
-                    hint.style.transform = "translateY(6px)";
-                }
-
-                localStorage.setItem("flip:page", "3");
-                location.hash = "";
-                return;
-            }
-
             pageFlip?.flipPrev();
         });
 
@@ -677,8 +662,7 @@ console.log("✅ main script started");
                 if (e.key !== "Enter") return;
                 const n = extractPageNumber(els.pageJump.value);
                 if (!Number.isFinite(n)) return;
-                const clamped = Math.max(1, Math.min(TOTAL_PAGES, n));
-                goToHuman(clamped);
+                goToHuman(n);
                 els.pageJump.blur();
             });
         }
@@ -732,8 +716,7 @@ console.log("✅ main script started");
             if (!els.stageMenu) return;
             els.stageMenu.innerHTML = STAGES.map(
                 ([k, label]) =>
-                    `<button type="button" data-stage="${k}">${k === stageKey ? "■" : "□"
-                    } ${label}</button>`
+                    `<button type="button" data-stage="${k}">${k === stageKey ? "■" : "□"} ${label}</button>`
             ).join("");
         }
 
@@ -787,30 +770,22 @@ console.log("✅ main script started");
     // Boot: ensure true resting state
     // ----------------------------
     function bootRestingState() {
-        // Stage + visuals
         applyStage();
         paintIcons();
         applyTransform();
         updatePanCursor();
 
-        // Resting classes
         document.body.classList.remove("is-reading");
         els.stage?.classList.add("is-resting");
 
-        // Flipbar hidden
         setFlipbarVisible(false);
 
-        // Guarantee landing defaults
         localStorage.setItem("flip:page", String(START_HUMAN_PAGE));
         localStorage.setItem("flip:stage", DEFAULT_STAGE_KEY);
 
-        // Hint visible
         showStartHint();
 
-        // Sync indicator to "3 of 239" even before init
         syncPageIndicator(START_HUMAN_PAGE);
-
-        // Lock rules should reflect "start page" (page 3 lock ON)
         updateNavLocks(START_HUMAN_PAGE);
     }
 
