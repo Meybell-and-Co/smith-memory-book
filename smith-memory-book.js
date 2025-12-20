@@ -953,10 +953,6 @@ Requires page → content mapping (JSON).
             updateNavLocks(START_HUMAN_PAGE);
         }
 
-        // Run
-        wireUIOnce();
-        bootRestingState();
-
         // ----------------------------
         // PDF Download (Mama/Papa)
         // ----------------------------
@@ -1061,4 +1057,10 @@ Requires page → content mapping (JSON).
         bindPdfModalOnce();
 
     }
+
+    // ----------------------------
+    // Initial boot (ONCE)
+    // ----------------------------
+    wireUIOnce();
+    bootRestingState();
 }());
