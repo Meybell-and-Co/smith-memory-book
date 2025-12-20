@@ -31,6 +31,7 @@ console.log("✅ main script started");
         grab: ICON_BASE + "grab-closed-gold.png",
         reset: ICON_BASE + "reset-gold.png",
         startHint: ICON_BASE + "click-me-to-start.gif",
+        download: ICON_BASE + "download-gold.png",
     };
 
     const STAGES = [
@@ -82,7 +83,7 @@ console.log("✅ main script started");
         btnMore: $("btnMore"),
         moreMenu: $("moreMenu"),
         btnShare: $("btnShare"),
-        btnPrint: $("btnPrint"),
+        btnDownload: $("btnDownload"),
         btnFull: $("btnFull"),
         btnSearch: $("btnSearch"),
         btnSound: $("btnSound"),
@@ -762,7 +763,7 @@ console.log("✅ main script started");
 
         // Share/Print/Full/Search/Sound
         els.btnShare && (els.btnShare.onclick = doShare);
-        els.btnPrint && (els.btnPrint.onclick = doPrintCurrent);
+        els.btnPrint && (els.btnPrint.onclick = openPdfModal);
 
         els.btnFull &&
             (els.btnFull.onclick = () => {
@@ -869,4 +870,80 @@ console.log("✅ main script started");
     // Run
     wireUIOnce();
     bootRestingState();
+
+// ----------------------------
+// PDF Download (Mama/Papa)
+// ----------------------------
+const PDFS = {
+  mama: {
+    url: "PASTE_MAMA_BEAR_PDF_URL_HERE",
+    label: "~140 MB",
+  },
+  papa: {
+    url: "PASTE_PAPA_BEAR_PDF_URL_HERE",
+    label: "~900 MB",
+    confirmText:
+      "This is a very large file (~900 MB).\n\nBest on desktop + fast Wi-Fi.\n\nDownload anyway?",
+  },
+};
+
+function openPdfModal() {
+  const modal = document.getElementById("pdfModal");
+  if (!modal) return;
+  modal.classList.add("is-open");
+  modal.setAttribute("aria-hidden", "false");
+  document.documentElement.style.overflow = "hidden";
+}
+
+function closePdfModal() {
+  const modal = document.getElementById("pdfModal");
+  if (!modal) return;
+  modal.classList.remove("is-open");
+  modal.setAttribute("aria-hidden", "true");
+  document.documentElement.style.overflow = "";
+}
+
+function triggerDownload(url) {
+  // reliable across browsers; your host controls whether it downloads vs previews
+  window.open(url, "_blank", "noopener,noreferrer");
+}
+
+function bindPdfModalOnce() {
+  const modal = document.getElementById("pdfModal");
+  const mamaBtn = document.getElementById("pdfMamaBtn");
+  const papaBtn = document.getElementById("pdfPapaBtn");
+  const mamaSize = document.getElementById("pdfMamaSize");
+  const papaSize = document.getElementById("pdfPapaSize");
+
+  if (!modal || !mamaBtn || !papaBtn) return;
+
+  if (mamaSize) mamaSize.textContent = PDFS.mama.label;
+  if (papaSize) papaSize.textContent = PDFS.papa.label;
+
+  // Close on backdrop / X
+  modal.addEventListener("click", (e) => {
+    if (e.target && e.target.hasAttribute("data-pdf-close")) closePdfModal();
+  });
+
+  // Close on Esc
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modal.classList.contains("is-open")) closePdfModal();
+  });
+
+  // Buttons
+  mamaBtn.addEventListener("click", () => {
+    closePdfModal();
+    triggerDownload(PDFS.mama.url);
+  });
+
+  papaBtn.addEventListener("click", () => {
+    if (!window.confirm(PDFS.papa.confirmText)) return;
+    closePdfModal();
+    triggerDownload(PDFS.papa.url);
+  });
+}
+
+// Call once after DOM exists
+bindPdfModalOnce();
+
 })();
