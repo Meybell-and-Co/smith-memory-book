@@ -33,15 +33,17 @@ console.log("✅ main script started");
         reset: ICON_BASE + "reset-gold.png",
         startHint: ICON_BASE + "click-me-to-start.gif",
         download: ICON_BASE + "download-gold.png",
+        stageactive: ICON_BASE + "swatches-gold.png",
+        stagebefore: ICON_BASE + "swatch-gold.png",
     };
 
     const STAGES = [
-        ["table", "Table"],
-        ["parquet", "Parquet"],
-        ["kitchen", "Counter"],
-        ["basement", "Basement"],
-        ["lawn", "Lawn"],
-        ["cancun", "Poolside"],
+        ["table", "Table", "🤍"],
+        ["parquet", "Parquet", "🧡"],
+        ["kitchen", "Kitchen", "💛"],
+        ["lawn", "Lawn", "💚"],
+        ["cancun", "Poolside", "💙"],
+        ["basement", "Basement", "💜"]
     ];
 
     const DEFAULT_ZOOM = 0.8;
@@ -90,7 +92,7 @@ console.log("✅ main script started");
         // btnSearch: $("btnSearch"),
         btnSound: $("btnSound"),
         btnStage: $("btnStage"),
-        stageMenu: $("stageMenu"),
+        stageSubmenu: $("stageSubmenu"),
     };
 
     // ----------------------------
@@ -794,192 +796,196 @@ Requires page → content mapping (JSON).
             });
 
         // Stage menu
-        function renderStageMenu() {
-            if (!els.stageMenu) return;
-            els.stageMenu.innerHTML = STAGES.map(
-                ([k, label]) =>
-                    `<button type="button" data-stage="${k}">${k === stageKey ? "■" : "□"} ${label}</button>`
+        function renderstageSubmenu() {
+            if (!els.stageSubmenu) return;
+            els.stageSubmenu.innerHTML = STAGES.map(
+                ([key, label, emoji]) =>
+                    `<button type="button" class="stage-item" data-stage="${key}">
+      <span class="label">${label}</span>
+      <span class="emoji">${emoji}</span>
+     </button>`
             ).join("");
+
         }
 
-        if (els.btnStage && els.stageMenu) {
-            renderStageMenu();
+        if (els.btnStage && els.stageSubmenu) {
+            renderStageSubmenu();
 
             els.btnStage.onclick = () => {
                 playSfx("click");
-                els.stageMenu.classList.toggle("is-open");
+                els.stageSubmenu.hidden = !els.stageSubmenu.hidden;
             };
-
-            els.stageMenu.addEventListener("click", (e) => {
-                const btn = e.target.closest("button[data-stage]");
-                if (!btn) return;
-                stageKey = btn.dataset.stage;
-                localStorage.setItem("flip:stage", stageKey);
-                applyStage();
-                renderStageMenu();
-            });
         }
 
-        // Button SFX (only for real buttons)
-        function wireButtonSfx(...ids) {
-            ids.forEach((id) => {
-                const el = $(id);
-                if (!el) return;
-                el.addEventListener("pointerenter", () => playSfx("hover"));
-                el.addEventListener("click", () => playSfx("click"));
-            });
-        }
-
-        wireButtonSfx(
-            "btnFirst",
-            "btnPrev",
-            "btnNext",
-            "btnLast",
-            "zoomOut",
-            "zoomIn",
-            "btnTiles",
-            "btnMore",
-            "btnShare",
-            "btnDownload",
-            "btnFull",
-            // MVP Note: we're not doing JSON mapping for an MVP product. //
-            // "btnSearch",
-            "btnSound",
-            "btnStage"
-        );
+        els.stageSubmenu.addEventListener("click", (e) => {
+            const btn = e.target.closest("button[data-stage]");
+            if (!btn) return;
+            stageKey = btn.dataset.stage;
+            localStorage.setItem("flip:stage", stageKey);
+            applyStage();
+            renderstageSubmenu();
+        });
     }
+
+    // Button SFX (only for real buttons)
+    function wireButtonSfx(...ids) {
+        ids.forEach((id) => {
+            const el = $(id);
+            if (!el) return;
+            el.addEventListener("pointerenter", () => playSfx("hover"));
+            el.addEventListener("click", () => playSfx("click"));
+        });
+    }
+
+    wireButtonSfx(
+        "btnFirst",
+        "btnPrev",
+        "btnNext",
+        "btnLast",
+        "zoomOut",
+        "zoomIn",
+        "btnTiles",
+        "btnMore",
+        "btnShare",
+        "btnDownload",
+        "btnFull",
+        // MVP Note: we're not doing JSON mapping for an MVP product. //
+        // "btnSearch",
+        "btnSound",
+        "btnStage"
+    );
 
     // ----------------------------
     // Boot: ensure true resting state
     // ----------------------------
     function bootRestingState() {
-        applyStage();
-        paintIcons();
-        applyTransform();
-        updatePanCursor();
+    applyStage();
+    paintIcons();
+    applyTransform();
+    updatePanCursor();
 
-        document.body.classList.remove("is-reading");
-        document.body.classList.add("is-cover-only");
-        document.body.classList.remove("is-end-state");
-        els.stage?.classList.add("is-resting");
-        syncCoverArt();
+    document.body.classList.remove("is-reading");
+    document.body.classList.add("is-cover-only");
+    document.body.classList.remove("is-end-state");
+    elsstage?.classList.add("is-resting");
+    syncCoverArt();
 
-        setFlipbarVisible(false);
+    setFlipbarVisible(false);
 
-        localStorage.setItem("flip:page", String(START_HUMAN_PAGE));
-        localStorage.setItem("flip:stage", DEFAULT_STAGE_KEY);
+    localStorage.setItem("flip:page", String(START_HUMAN_PAGE));
+    localStorage.setItem("flip:stage", DEFAULT_STAGE_KEY);
 
-        if (els.startScreen) els.startScreen.style.display = "";
+    if (els.startScreen) els.startScreen.style.display = "";
 
-        showStartHint();
-        syncCoverArt();
+    showStartHint();
+    syncCoverArt();
 
-        syncPageIndicator(START_HUMAN_PAGE);
-        updateNavLocks(START_HUMAN_PAGE);
+    syncPageIndicator(START_HUMAN_PAGE);
+    updateNavLocks(START_HUMAN_PAGE);
+}
+
+// Run
+wireUIOnce();
+bootRestingState();
+
+// ----------------------------
+// PDF Download (Mama/Papa)
+// ----------------------------
+const PDFS = {
+    mama: {
+        url: "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/guest-user-copies/Dear-Little-Home-Med-Res.pdf",
+        label: "~140 MB",
+    },
+    papa: {
+        url: "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/guest-user-copies/Dear-Little-Home-Hi-Res.pdf",
+        label: "~900 MB",
+        confirmText:
+            "This is a very large file (~900 MB).\n\nBest on desktop + fast Wi-Fi.\n\nDownload anyway?",
+    },
+};
+
+function openPdfModal() {
+    const modal = document.getElementById("pdfModal");
+    if (!modal) return;
+
+    // Remember what had focus (usually the Download button)
+    lastPdfOpenerEl = document.activeElement;
+
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
+    modal.removeAttribute("inert"); // wake it up
+    document.documentElement.style.overflow = "hidden";
+
+    // Optional but nice: focus the recommended option
+    const mama = document.getElementById("pdfMamaBtn");
+    mama && mama.focus();
+}
+
+function closePdfModal() {
+    const modal = document.getElementById("pdfModal");
+    if (!modal) return;
+
+    // 🔑 1. Move focus OUT first
+    if (lastPdfOpenerEl && typeof lastPdfOpenerEl.focus === "function") {
+        lastPdfOpenerEl.focus();
+    } else if (document.body && typeof document.body.focus === "function") {
+        document.body.focus();
     }
 
-    // Run
-    wireUIOnce();
-    bootRestingState();
+    // 🔑 2. THEN hide + deactivate
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+    modal.setAttribute("inert", ""); // put it to sleep
+    document.documentElement.style.overflow = "";
+}
 
-    // ----------------------------
-    // PDF Download (Mama/Papa)
-    // ----------------------------
-    const PDFS = {
-        mama: {
-            url: "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/guest-user-copies/Dear-Little-Home-Med-Res.pdf",
-            label: "~140 MB",
-        },
-        papa: {
-            url: "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/guest-user-copies/Dear-Little-Home-Hi-Res.pdf",
-            label: "~900 MB",
-            confirmText:
-                "This is a very large file (~900 MB).\n\nBest on desktop + fast Wi-Fi.\n\nDownload anyway?",
-        },
-    };
+function triggerDownload(url) {
+    // reliable across browsers; your host controls whether it downloads vs previews
+    window.open(url, "_blank", "noopener,noreferrer");
+}
 
-    function openPdfModal() {
-        const modal = document.getElementById("pdfModal");
-        if (!modal) return;
-
-        // Remember what had focus (usually the Download button)
-        lastPdfOpenerEl = document.activeElement;
-
-        modal.classList.add("is-open");
-        modal.setAttribute("aria-hidden", "false");
-        modal.removeAttribute("inert"); // wake it up
-        document.documentElement.style.overflow = "hidden";
-
-        // Optional but nice: focus the recommended option
-        const mama = document.getElementById("pdfMamaBtn");
-        mama && mama.focus();
-    }
-
-    function closePdfModal() {
-        const modal = document.getElementById("pdfModal");
-        if (!modal) return;
-
-        // 🔑 1. Move focus OUT first
-        if (lastPdfOpenerEl && typeof lastPdfOpenerEl.focus === "function") {
-            lastPdfOpenerEl.focus();
-        } else if (document.body && typeof document.body.focus === "function") {
-            document.body.focus();
-        }
-
-        // 🔑 2. THEN hide + deactivate
-        modal.classList.remove("is-open");
-        modal.setAttribute("aria-hidden", "true");
-        modal.setAttribute("inert", ""); // put it to sleep
-        document.documentElement.style.overflow = "";
-    }
-
-    function triggerDownload(url) {
-        // reliable across browsers; your host controls whether it downloads vs previews
-        window.open(url, "_blank", "noopener,noreferrer");
-    }
-
-    function bindPdfModalOnce() {
-        const modal = document.getElementById("pdfModal");
-        const mamaBtn = document.getElementById("pdfMamaBtn");
-        const papaBtn = document.getElementById("pdfPapaBtn");
-        const mamaSize = document.getElementById("pdfMamaSize");
-        const papaSize = document.getElementById("pdfPapaSize");
+function bindPdfModalOnce() {
+    const modal = document.getElementById("pdfModal");
+    const mamaBtn = document.getElementById("pdfMamaBtn");
+    const papaBtn = document.getElementById("pdfPapaBtn");
+    const mamaSize = document.getElementById("pdfMamaSize");
+    const papaSize = document.getElementById("pdfPapaSize");
 
 
-        if (!modal || !mamaBtn || !papaBtn) return;
+    if (!modal || !mamaBtn || !papaBtn) return;
 
-        if (mamaSize) mamaSize.textContent = PDFS.mama.label;
-        if (papaSize) papaSize.textContent = PDFS.papa.label;
+    if (mamaSize) mamaSize.textContent = PDFS.mama.label;
+    if (papaSize) papaSize.textContent = PDFS.papa.label;
 
-        // Close on backdrop / X
-        modal.addEventListener("click", (e) => {
-            if (e.target && e.target.hasAttribute("data-pdf-close")) closePdfModal();
-        });
+    // Close on backdrop / X
+    modal.addEventListener("click", (e) => {
+        if (e.target && e.target.hasAttribute("data-pdf-close")) closePdfModal();
+    });
 
-        // Close on Esc
-        document.addEventListener("keydown", (e) => {
-            if (e.key === "Escape" && modal.classList.contains("is-open")) closePdfModal();
-        });
+    // Close on Esc
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && modal.classList.contains("is-open")) closePdfModal();
+    });
 
-        // Buttons
-        mamaBtn.addEventListener("click", () => {
-            console.log("MAMA URL:", PDFS?.mama?.url);
-            closePdfModal();
-            triggerDownload(PDFS.mama.url);
-        });
+    // Buttons
+    mamaBtn.addEventListener("click", () => {
+        console.log("MAMA URL:", PDFS?.mama?.url);
+        closePdfModal();
+        triggerDownload(PDFS.mama.url);
+    });
 
-        papaBtn.addEventListener("click", () => {
-            console.log("PAPA URL:", PDFS?.papa?.url);
+    papaBtn.addEventListener("click", () => {
+        console.log("PAPA URL:", PDFS?.papa?.url);
 
-            const ok = window.confirm(PDFS.papa.confirmText);
-            if (!ok) return;
+        const ok = window.confirm(PDFS.papa.confirmText);
+        if (!ok) return;
 
-            closePdfModal();
-            triggerDownload(PDFS.papa.url);
-        });
-    }
+        closePdfModal();
+        triggerDownload(PDFS.papa.url);
+    });
+}
 
-    // Call once after DOM exists
-    bindPdfModalOnce();
+// Call once after DOM exists
+bindPdfModalOnce();
 
-})();
+}) ();

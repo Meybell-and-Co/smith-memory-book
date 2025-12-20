@@ -74,21 +74,32 @@ body.is-reading #flipbook-stage::after {
 /* ----------------------------
    Stage menu
 ---------------------------- */
-.stagemenu {
-  display: none;
+.stage-submenu {
   margin-top: 8px;
   padding-top: 8px;
+  padding-left: 18px;
   border-top: 1px solid color-mix(in srgb, var(--charcoal) 35%, transparent);
 }
 
-.stagemenu.is-open {
-  display: block;
-}
-
-.stagemenu button {
+.stage-submenu button {
   display: block;
   width: 100%;
   text-align: left;
+}
+
+/* ----------------------------
+   Stage Items
+---------------------------- */
+
+.stage-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stage-item .emoji {
+  opacity: 0.9;
+  margin-left: 8px;
 }
 
 /* ----------------------------
