@@ -559,6 +559,12 @@ console.log("✅ main script started");
         els.stage?.classList.add("is-resting");
         allowBackUnder3Once = false;
 
+        /* DEBUG: show a bright border when we're truly in end-state */
+        body.is - end - state #startBtn{
+            outline: 6px solid hotpink;
+            outline - offset: 6px;
+        }
+
         // flipbar hidden
         setFlipbarVisible(false);
 
