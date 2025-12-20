@@ -573,11 +573,6 @@ console.log("✅ main script started");
         showStartHint();
         syncCoverArt();
 
-        // front cover as the big "button"
-        if (els.startBtn) {
-            els.startBtn.style.backgroundImage = `url("${pageUrl(1)}")`;
-        }
-
         // close menus
         els.tiles?.classList.remove("is-open");
         els.moreMenu?.classList.remove("is-open");
@@ -587,6 +582,8 @@ console.log("✅ main script started");
         document.body.classList.remove("is-reading");
         document.body.classList.add("is-cover-only");
         document.body.classList.add("is-end-state");
+
+        syncCoverArt(); // ✅ add this line
 
         els.stage?.classList.add("is-resting");
         allowBackUnder3Once = false;
