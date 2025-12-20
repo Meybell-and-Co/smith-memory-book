@@ -787,6 +787,23 @@ console.log("✅ main script started");
             }
         });
 
+        document.addEventListener("keydown", (e) => {
+            if (e.key !== "Escape") return;
+
+            // If the PDF modal is open, let the modal's own handler close it.
+            if (document.getElementById("pdfModal")?.classList.contains("is-open")) return;
+
+            // Close More menu
+            els.moreMenu?.classList.remove("is-open");
+
+            // Close Stage submenu + reset Stage icon
+            if (els.stageSubmenu && !els.stageSubmenu.hidden) {
+                els.stageSubmenu.hidden = true;
+                updateStageIcon(false);
+                els.btnStage?.setAttribute("aria-expanded", "false");
+            }
+        });
+
         // Share/Print/Full/Sound
         els.btnShare && (els.btnShare.onclick = doShare);
         els.btnDownload && (els.btnDownload.onclick = openPdfModal);
@@ -976,6 +993,9 @@ Requires page → content mapping (JSON).
         modal.setAttribute("aria-hidden", "true");
         modal.setAttribute("inert", ""); // put it to sleep
         document.documentElement.style.overflow = "";
+
+        els.moreMenu?.classList.remove("is-open");
+
     }
 
     function triggerDownload(url) {
