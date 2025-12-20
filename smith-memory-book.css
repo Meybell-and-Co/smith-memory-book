@@ -100,37 +100,96 @@ body.is-reading #flipbook-stage::after {
 }
 
 /* ----------------------------
-   Stage Items
+   Stage menu (hearts + full-width stripes)
 ---------------------------- */
-.stage-item {
+.stage-submenu {
+  margin-top: 8px;
+  padding-top: 8px;
+  padding-left: 0; /* IMPORTANT: allows edge-to-edge stripes */
+  border-top: 1px solid color-mix(in srgb, var(--charcoal) 35%, transparent);
+
+  background: rgba(20, 20, 20, 0.22);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+
+  padding-right: 0;
+  padding-bottom: 6px;
+}
+
+/* Each submenu row becomes the full-width stripe */
+.stage-submenu .stage-subitem {
+  --accent: #ffffff;
+
+  width: 100%;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 10px;
+
+  /* indent happens here (not by padding the container) */
+  padding: 10px 14px 10px 18px;
+
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
 
   position: relative;
+  border-radius: 0; /* keep stripe flush to menu edges */
 }
 
-.stage-item::after {
-  content: "■";
+/* Full-width colored strip (hover + active) */
+.stage-submenu .stage-subitem::before {
+  content: "";
   position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  opacity: 0.35;
-  font-size: 14px;
+  inset: 0; /* edge-to-edge */
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  opacity: 0;
+  transition: opacity 120ms ease;
+  pointer-events: none;
+}
+
+.stage-submenu .stage-subitem:hover::before,
+.stage-submenu .stage-subitem.is-active::before {
+  opacity: 1;
+}
+
+/* Ensure content sits above strip */
+.stage-submenu .stage-subitem .heart,
+.stage-submenu .stage-subitem .label {
+  position: relative;
+  z-index: 1;
+}
+
+/* Heart on the left (baseline white) */
+.stage-submenu .stage-subitem .heart {
+  width: 22px;
+  min-width: 22px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 18px;            /* 👈 bigger visibility */
   line-height: 1;
+  transform: translateY(-1px);
+
+  color: rgba(255, 255, 255, 0.92);
+  transition: color 120ms ease, transform 120ms ease;
 }
 
-.stage-item.is-selected::after {
-  content: "▣";
-  opacity: 0.95;
+/* Hover: heart turns to accent */
+.stage-submenu .stage-subitem:hover .heart {
+  color: var(--accent);
 }
 
-.stage-item .emoji {
-  opacity: 0.9;
-  margin-left: 8px;
+/* Active: heart stays accent */
+.stage-submenu .stage-subitem.is-active .heart {
+  color: var(--accent);
+  transform: translateY(-1px) scale(1.08);
 }
-
 
 /* ----------------------------
    Wrap + Frame

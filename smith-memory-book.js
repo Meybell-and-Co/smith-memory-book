@@ -44,7 +44,7 @@ console.log("✅ main script started");
 
     const STAGES = [
         // key        label       heart/emoji color (used for heart + stripe tint)
-        ["table", "Table", "#ffffff"],
+        ["table", "Table", "#ff0080"],
         ["parquet", "Parquet", "#F97316"],
         ["kitchen", "Kitchen", "#FACC15"],
         ["lawn", "Lawn", "#22C55E"],
@@ -65,7 +65,7 @@ console.log("✅ main script started");
 
     const $ = (id) => document.getElementById(id);
 
-    const els = {
+    let els = {
         stage: $("flipbook-stage"),
         wrap: $("flipbook-wrap"),
         book: $("flipbook"),
@@ -253,12 +253,6 @@ console.log("✅ main script started");
         icon.src = isOpen
             ? ICONS.stageactive   // swatches-gold.png
             : ICONS.stagebefore;  // swatch-gold.png
-    }
-
-    function setStageSelected(stageKey) {
-        document.querySelectorAll(".stage-submenu .stage-item").forEach((el) => {
-            el.classList.toggle("is-selected", el.dataset.stage === stageKey);
-        });
     }
 
     function setActiveStageButton(activeKey) {
@@ -702,7 +696,7 @@ console.log("✅ main script started");
             body: document.body.className
         });
 
-        applyStage(currentStageKey);
+        applyStage(stageKey);
         paintIcons();
         applyTransform();
         updatePanCursor();
@@ -729,7 +723,7 @@ console.log("✅ main script started");
 
     function wireUIOnce() {
         paintIcons();
-        applyStage(currentStageKey);
+        applyStage(stageKey);
         setFlipbarVisible(false); // resting default
 
         function currentHuman() {
@@ -883,6 +877,10 @@ console.log("✅ main script started");
             }
         });
 
+        // ----------------------------
+        // Stage menu (hearts + full-width stripes)
+        // ----------------------------
+
         function buildStageSubmenu() {
             const menu = els.stageSubmenu || document.getElementById("stageSubmenu");
             if (!menu || menu.childElementCount) return;
@@ -895,50 +893,14 @@ console.log("✅ main script started");
                 btn.style.setProperty("--accent", accent);
 
                 btn.innerHTML = `
-      <span class="heart" aria-hidden="true">♥</span>
-      <span class="label">${label}</span>
-    `;
+            <span class="heart" aria-hidden="true">♥</span>
+            <span class="label">${label}</span>
+        `;
 
-                btn.addEventListener("click", (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    applyStage(key);           // your existing function
-                    setActiveStageButton(key); // keep heart colored
-                });
-
+                // No per-button click handler here; we delegate below.
                 menu.appendChild(btn);
             });
         }
-
-        // Share/Print/Full/Sound
-        els.btnShare && (els.btnShare.onclick = doShare);
-        els.btnDownload && (els.btnDownload.onclick = openPdfModal);
-
-        els.btnFull &&
-            (els.btnFull.onclick = () => {
-                const stage = els.stage;
-                if (!stage) return;
-                if (!document.fullscreenElement) stage.requestFullscreen?.();
-                else document.exitFullscreen?.();
-            });
-
-        /* MVP NOTE:
-Search intentionally disabled.
-Requires page → content mapping (JSON).
-*/
-        // els.btnSearch && (els.btnSearch.onclick = () => alert("Search UI next step 😈"));
-
-        els.btnSound &&
-            (els.btnSound.onclick = () => {
-                soundOn = !soundOn;
-                localStorage.setItem("flip:sound", soundOn ? "1" : "0");
-                paintIcons();
-                (soundOn ? SFX.soundOn : SFX.soundOff).play().catch(() => { });
-            });
-
-        // ----------------------------
-        // Stage menu (hearts + full-width stripes)
-        // ----------------------------
 
         // Build the submenu once (buttons with hearts + --accent)
         buildStageSubmenu();
@@ -967,28 +929,8 @@ Requires page → content mapping (JSON).
             stageKey = btn.dataset.stage;
             localStorage.setItem("flip:stage", stageKey);
 
-            // Apply environment + sync hearts
+            // Apply environment + sync hearts (sync happens inside applyStage)
             applyStage(stageKey);
-
-            function applyStage(stageKey) {
-                if (!els.stage) return;
-
-                const stageVar =
-                    {
-                        table: "var(--stage-table)",
-                        parquet: "var(--stage-parquet)",
-                        kitchen: "var(--stage-kitchen)",
-                        basement: "var(--stage-basement)",
-                        lawn: "var(--stage-lawn)",
-                        cancun: "var(--stage-cancun)",
-                    }[stageKey] || "var(--stage-table)";
-
-                els.stage.style.setProperty("--stage-img", stageVar);
-
-                // ✅ ALWAYS sync submenu state here
-                setActiveStageButton(stageKey);
-            }
-            F
 
             // Close after selecting (feels nicer)
             els.stageSubmenu.hidden = true;
