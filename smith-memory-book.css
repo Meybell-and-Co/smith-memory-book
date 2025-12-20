@@ -105,7 +105,8 @@ body.is-reading #flipbook-stage::after {
 .stage-submenu {
   margin-top: 8px;
   padding-top: 8px;
-  padding-left: 0; /* IMPORTANT: allows edge-to-edge stripes */
+  padding-left: 0;
+  /* IMPORTANT: allows edge-to-edge stripes */
   border-top: 1px solid color-mix(in srgb, var(--charcoal) 35%, transparent);
 
   background: rgba(20, 20, 20, 0.22);
@@ -137,14 +138,16 @@ body.is-reading #flipbook-stage::after {
   cursor: pointer;
 
   position: relative;
-  border-radius: 0; /* keep stripe flush to menu edges */
+  border-radius: 0;
+  /* keep stripe flush to menu edges */
 }
 
 /* Full-width colored strip (hover + active) */
 .stage-submenu .stage-subitem::before {
   content: "";
   position: absolute;
-  inset: 0; /* edge-to-edge */
+  inset: 0;
+  /* edge-to-edge */
   background: color-mix(in srgb, var(--accent) 18%, transparent);
   opacity: 0;
   transition: opacity 120ms ease;
@@ -163,6 +166,14 @@ body.is-reading #flipbook-stage::after {
   z-index: 1;
 }
 
+.stage-submenu .stage-subitem .label {
+  color: #fff !important;
+}
+
+.stage-submenu .stage-subitem:disabled .label {
+  opacity: 0.45;
+}
+
 /* Heart on the left (baseline white) */
 .stage-submenu .stage-subitem .heart {
   width: 22px;
@@ -171,7 +182,8 @@ body.is-reading #flipbook-stage::after {
   justify-content: center;
   align-items: center;
 
-  font-size: 18px;            /* 👈 bigger visibility */
+  font-size: 18px;
+  /* 👈 bigger visibility */
   line-height: 1;
   transform: translateY(-1px);
 
