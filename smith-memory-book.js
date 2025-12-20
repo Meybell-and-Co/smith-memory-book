@@ -948,6 +948,26 @@ console.log("✅ main script started");
             });
         }
 
+        // Sound toggle (stateful — keep separate from generic button SFX)
+        if (els.btnSound) {
+            els.btnSound.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const next = !soundOn;
+
+                // play "turning off" chirp while sound is still on
+                if (soundOn && !next) playSfx("soundOff");
+
+                soundOn = next;
+                localStorage.setItem("flip:sound", soundOn ? "1" : "0");
+                paintIcons?.();
+
+                // play "turning on" chirp after enabling
+                if (soundOn) playSfx("soundOn");
+            };
+        }
+
         wireButtonSfx(
             "btnFirst",
             "btnPrev",
