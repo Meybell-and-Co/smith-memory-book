@@ -575,5 +575,5 @@ body:not(.is-end-state) #flipbook-stage.is-resting #startHint {
 /* DEBUG: show a bright border when we're truly in end-state */
 body.is-end-state #startBtn {
   outline: 6px solid hotpink;
-  outline - offset: 6px;
+  outline-offset: 6px;
 }
