@@ -975,3 +975,5 @@ function bindPdfModalOnce() {
 
 // Call once after DOM exists
 bindPdfModalOnce();
+
+}) ();
