@@ -514,6 +514,16 @@ console.log("✅ main script started");
 
         els.startBtn.style.backgroundImage = `url("${target}")`;
 
+        // TRUTH SERUM
+        const inlineBg = els.startBtn.getAttribute("style") || "";
+        const computedBg = getComputedStyle(els.startBtn).backgroundImage;
+        console.log("🧪 syncCoverArt:", {
+            isEnd,
+            target,
+            inlineStyle: inlineBg,
+            computedBackgroundImage: computedBg
+        });
+
     }
 
     function setFlipbarVisible(visible) {
@@ -582,8 +592,9 @@ console.log("✅ main script started");
         document.body.classList.remove("is-reading");
         document.body.classList.add("is-cover-only");
         document.body.classList.add("is-end-state");
+        console.log("🧪 goToEndState fired. body.className =", document.body.className);
 
-        syncCoverArt(); // ✅ add this line
+        syncCoverArt();
 
         els.stage?.classList.add("is-resting");
         allowBackUnder3Once = false;
