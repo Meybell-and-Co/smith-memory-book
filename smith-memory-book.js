@@ -210,6 +210,15 @@ console.log("✅ main script started");
         });
     }
 
+    function updateStageIcon(isOpen = false) {
+        const icon = document.getElementById("iconStage");
+        if (!icon) return;
+
+        icon.src = isOpen
+            ? ICONS.stageactive   // swatches-gold.png
+            : ICONS.stagebefore;  // swatch-gold.png
+    }
+
     function updateStageIcon(open = false) {
         const icon = document.getElementById("iconStage");
         if (!icon) return;
