@@ -486,6 +486,12 @@ body.is-reading #startScreen {
   display: none !important;
 }
 
+body.is-end-state #startHint {
+  display: none !important;
+  opacity: 0 !important;
+  animation: none !important;
+}
+
 /* ----------------------------
    Start hint GIF overlay
 ---------------------------- */

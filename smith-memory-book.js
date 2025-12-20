@@ -525,6 +525,7 @@ console.log("✅ main script started");
         document.body.classList.add("is-reading");
         document.body.classList.remove("is-cover-only");
         els.stage?.classList.remove("is-resting");
+        document.body.classList.remove("is-end-state");
 
         // show flipbar (CSS handles animation)
         setFlipbarVisible(true);
@@ -544,6 +545,7 @@ console.log("✅ main script started");
         // Ensure end state matches start
         document.body.classList.remove("is-reading");
         document.body.classList.add("is-cover-only");
+        document.body.classList.remove("is-end-state");
         els.stage?.classList.add("is-resting");
         allowBackUnder3Once = false;
 
@@ -567,6 +569,7 @@ console.log("✅ main script started");
     function goToEndState() {
         document.body.classList.remove("is-reading");
         document.body.classList.add("is-cover-only");
+        document.body.classList.add("is-end-state");
 
         els.stage?.classList.add("is-resting");
         allowBackUnder3Once = false;
@@ -825,6 +828,7 @@ console.log("✅ main script started");
 
         document.body.classList.remove("is-reading");
         els.stage?.classList.add("is-resting");
+        document.body.classList.remove("is-end-state");
 
         setFlipbarVisible(false);
 
