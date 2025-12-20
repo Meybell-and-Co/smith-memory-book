@@ -38,21 +38,6 @@ input {
   overflow: hidden;
 }
 
-/* ---- Resting vs Reading modes ---- */
-#flipbook-stage.is-resting #flipbar {
-  display: none;
-}
-
-/* Hide the actual flipbook in resting mode so the cover button is the only entry */
-#flipbook-stage.is-resting #flipbook {
-  opacity: 0;
-  pointer-events: none;
-}
-
-#flipbook-stage.is-resting #flipbook-wrap {
-  opacity: 1;
-}
-
 /* ----------------------------
    Stage menu
 ---------------------------- */
@@ -94,6 +79,7 @@ input {
 }
 
 body.is-reading #flipbook-wrap {
+  display: flex !important;
   opacity: 1;
 }
 
@@ -111,8 +97,22 @@ body.is-reading #flipbook-wrap {
   z-index: 0;
 }
 
-/* When viewing ONLY a cover, hide the hardback frame/pastedown overlay */
-body.is-cover-only #flipbook-wrap::before {
+#flipbook-stage.is-resting #flipbar {
+  display: none;
+}
+
+#flipbook-stage.is-resting #flipbook {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#flipbook-stage.is-resting #flipbook-wrap {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+body.is-cover-only #flipbook-wrap {
+  display: none !important;
   opacity: 0 !important;
 }
 
