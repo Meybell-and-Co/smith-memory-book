@@ -501,12 +501,11 @@ body.is-end-state #startHint {
   pointer-events: none;
 
   inset: auto;
-  right: 31.5%;
+  right: 20.5%;
   bottom: 14%;
 
   width: 180px;
   height: 180px;
-
   display: none;
   opacity: 0;
   transform: translateY(6px);
@@ -520,7 +519,7 @@ body.is-end-state #startHint {
   transition-delay: 0s;
 }
 
-#flipbook-stage.is-resting #startHint {
+body:not(.is-end-state) #flipbook-stage.is-resting #startHint {
   display: block;
   opacity: 1;
   transform: translateY(0);

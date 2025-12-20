@@ -561,6 +561,11 @@ console.log("✅ main script started");
         if (els.startScreen) els.startScreen.style.display = "";
         showStartHint();
 
+        // front cover as the big "button"
+        if (els.startBtn) {
+            els.startBtn.style.backgroundImage = `url("${pageUrl(1)}")`;
+        }
+
         // close menus
         els.tiles?.classList.remove("is-open");
         els.moreMenu?.classList.remove("is-open");
@@ -581,8 +586,7 @@ console.log("✅ main script started");
         localStorage.setItem("flip:stage", DEFAULT_STAGE_KEY);
         location.hash = "";
 
-        // show start UI
-        SMB.hideStartHint?.();
+        // show cover UI
         if (els.startScreen) els.startScreen.style.display = "";
 
         // back cover as the big "button"
@@ -590,7 +594,8 @@ console.log("✅ main script started");
             els.startBtn.style.backgroundImage = `url("${pageUrl(TOTAL_PAGES)}")`;
         }
 
-        showStartHint?.();
+        // end-state never shows the hint
+        SMB.hideStartHint?.();
 
         // close menus
         els.tiles?.classList.remove("is-open");
