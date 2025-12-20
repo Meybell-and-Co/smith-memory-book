@@ -512,7 +512,7 @@ console.log("✅ main script started");
         const isEnd = document.body.classList.contains("is-end-state");
         const target = isEnd ? pageUrl(TOTAL_PAGES) : pageUrl(1);
 
-        els.startBtn.style.backgroundImage = `url("${target}")`;
+        els.startBtn.style.background = `url("${target}") center / contain no-repeat`;
     }
 
     function setFlipbarVisible(visible) {
