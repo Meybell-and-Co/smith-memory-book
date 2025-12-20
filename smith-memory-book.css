@@ -501,7 +501,7 @@ body.is-end-state #startHint {
   pointer-events: none;
 
   inset: auto;
-  right: 45.5%;
+  right: 2%;
   bottom: 14%;
 
   width: 180px;
