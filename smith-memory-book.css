@@ -121,8 +121,7 @@ body.is-reading #flipbook-stage::after {
 
 /* Each submenu row becomes the full-width stripe */
 .stage-submenu .stage-subitem {
-  --accent: #ffffff;
-
+  color: #ffffff;
   width: 100%;
   display: flex;
   align-items: center;
