@@ -171,10 +171,13 @@ body.is-cover-only #flipbook-wrap::before {
   aspect-ratio: 4000 / 3778;
   border: 0;
   height: auto;
-  background: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/pages/lembo_0001.webp") center / contain no-repeat;
   cursor: pointer;
   filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.35));
   background-color: transparent;
+  background: transparent;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
 }
 
 body.is-reading #startScreen {
