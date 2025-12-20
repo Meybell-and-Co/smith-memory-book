@@ -505,6 +505,16 @@ console.log("✅ main script started");
     // ----------------------------
     // Start / End state control
     // ----------------------------
+
+    function syncCoverArt() {
+        if (!els.startBtn) return;
+
+        const isEnd = document.body.classList.contains("is-end-state");
+        const target = isEnd ? pageUrl(TOTAL_PAGES) : pageUrl(1);
+
+        els.startBtn.style.backgroundImage = `url("${target}")`;
+    }
+
     function setFlipbarVisible(visible) {
         if (!els.flipbar) return;
         els.flipbar.style.display = visible ? "" : "none";
@@ -560,6 +570,7 @@ console.log("✅ main script started");
         // show start UI
         if (els.startScreen) els.startScreen.style.display = "";
         showStartHint();
+        syncCoverArt();
 
         // front cover as the big "button"
         if (els.startBtn) {
@@ -588,11 +599,6 @@ console.log("✅ main script started");
 
         // show cover UI
         if (els.startScreen) els.startScreen.style.display = "";
-
-        // back cover as the big "button"
-        if (els.startBtn) {
-            els.startBtn.style.backgroundImage = `url("${pageUrl(TOTAL_PAGES)}")`;
-        }
 
         // end-state never shows the hint
         SMB.hideStartHint?.();
@@ -834,6 +840,7 @@ console.log("✅ main script started");
         document.body.classList.remove("is-reading");
         els.stage?.classList.add("is-resting");
         document.body.classList.remove("is-end-state");
+        syncCoverArt();
 
         setFlipbarVisible(false);
 
@@ -841,6 +848,7 @@ console.log("✅ main script started");
         localStorage.setItem("flip:stage", DEFAULT_STAGE_KEY);
 
         showStartHint();
+        syncCoverArt();
 
         syncPageIndicator(START_HUMAN_PAGE);
         updateNavLocks(START_HUMAN_PAGE);
