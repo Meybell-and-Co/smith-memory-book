@@ -21,8 +21,8 @@ console.log("✅ main script started");
         print: ICON_BASE + "print-gold.png",
         fullscreen: ICON_BASE + "maximize-gold.png",
         more: ICON_BASE + "ellipsis-gold.png",
-        start: ICON_BASE + "start-gold.png",
-        end: ICON_BASE + "end-gold.png",
+        start: ICON_BASE + "go-to-front-cover-a.png",
+        end: ICON_BASE + "go-to-back-cover-z.png",
         soundOn: ICON_BASE + "sound-gold.png",
         soundOff: ICON_BASE + "sound-off-gold.png",
         prev: ICON_BASE + "previous-gold.png",
@@ -481,8 +481,23 @@ console.log("✅ main script started");
 
         localStorage.setItem("flip:page", String(clamped));
         pageFlip?.flip(humanToIdx(clamped));
+
+        preloadPages(clamped, 3);
+
         syncPageIndicator(clamped);
         updateNavLocks(clamped);
+    }
+
+    function preloadPages(pageNum, radius = 3) {
+        const start = Math.max(1, pageNum - 1);
+        const end = Math.min(TOTAL_PAGES, pageNum + radius);
+
+        for (let p = start; p <= end; p++) {
+            const img = new Image();
+            img.decoding = "async";
+            img.loading = "eager";
+            img.src = `${BASE}lembo-${String(p).padStart(4, "0")}.webp`;
+        }
     }
 
     SMB.goToHuman = goToHuman;
