@@ -8,6 +8,10 @@ console.log("✅ main script started");
     const BASE = "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/pages/";
     const TOTAL_PAGES = 239;
 
+    const PAGE_PREFIX = "lembo_";
+    const PAGE_EXT = ".webp";
+    const PAGE_PAD = 4;
+
     const ROOT = "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/";
     const ICON_BASE = ROOT + "flipbook-ui-icons/";
     const SOUND_BASE = ROOT + "sounds/";
@@ -168,7 +172,7 @@ console.log("✅ main script started");
     // ----------------------------
     function pageUrl(humanPageNum) {
         const n = String(humanPageNum).padStart(4, "0");
-        return `${BASE}lembo_${n}.webp`;
+          return `${BASE}${PAGE_PREFIX}${n}${PAGE_EXT}`;
     }
 
     function idxToHuman(idx) {
