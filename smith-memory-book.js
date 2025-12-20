@@ -19,7 +19,8 @@ console.log("✅ main script started");
     const ICONS = {
         zoomIn: ICON_BASE + "add-gold.png",
         zoomOut: ICON_BASE + "subtract-gold.png",
-        tiles: ICON_BASE + "tiles-gold.png",
+        // Disabling Tile Icon for MVP Shipment deadline //
+        // tiles: ICON_BASE + "tiles-gold.png",
         // MVP Note: we're not doing JSON mapping for an MVP product. //
         // search: ICON_BASE + "search-gold.png", //
         share: ICON_BASE + "share-gold.png",
@@ -770,14 +771,14 @@ console.log("✅ main script started");
         els.zoomOut && (els.zoomOut.onclick = () => setZoom(zoom - 0.1));
         els.zoomReset && (els.zoomReset.onclick = () => resetViewToComfort());
 
-        // Tiles
-        if (els.btnTiles) {
-            els.btnTiles.onclick = () => {
-                els.tiles?.classList.toggle("is-open");
-                buildTilesOnce();
-            };
-        }
-        els.tilesClose && (els.tilesClose.onclick = () => els.tiles?.classList.remove("is-open"));
+        // Tiles Disabled for MVP Shipment deadline //
+        // if (els.btnTiles) {
+        //     els.btnTiles.onclick = () => {
+        //         els.tiles?.classList.toggle("is-open");
+        //         buildTilesOnce();
+        //     };
+        // }
+        // els.tilesClose && (els.tilesClose.onclick = () => els.tiles?.classList.remove("is-open"));
 
         // More menu
         els.btnMore && (els.btnMore.onclick = () => els.moreMenu?.classList.toggle("is-open"));
@@ -900,7 +901,8 @@ Requires page → content mapping (JSON).
         "btnLast",
         "zoomOut",
         "zoomIn",
-        "btnTiles",
+        // disabling tiles for MVP shipment deadline //
+        // "btnTiles",
         "btnMore",
         "btnShare",
         "btnDownload",
