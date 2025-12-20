@@ -524,6 +524,7 @@ console.log("✅ main script started");
         // mark reading
         document.body.classList.add("is-reading");
         els.stage?.classList.remove("is-resting");
+        document.body.classList.remove("is-cover-only");
 
         // show flipbar (CSS handles animation)
         setFlipbarVisible(true);
@@ -543,6 +544,7 @@ console.log("✅ main script started");
         // Ensure end state matches start
         document.body.classList.remove("is-reading");
         els.stage?.classList.add("is-resting");
+        document.body.classList.add("is-cover-only");
         allowBackUnder3Once = false;
 
         // flipbar hidden
@@ -560,6 +562,24 @@ console.log("✅ main script started");
         // close menus
         els.tiles?.classList.remove("is-open");
         els.moreMenu?.classList.remove("is-open");
+    }
+
+    function goToEndState() {
+        document.body.classList.remove("is-reading");
+        document.body.classList.add("is-cover-only");
+        els.stage?.classList.add("is-resting");
+        allowBackUnder3Once = false;
+
+        setFlipbarVisible(false);
+
+        SMB.hideStartHint?.();
+        if (els.startScreen) els.startScreen.style.display = "";
+
+        // Show the back cover image on the big start button
+        // (pick the correct page index for your back cover asset)
+        if (els.startBtn) els.startBtn.style.backgroundImage = `url("${pageUrl(TOTAL_PAGES)}")`;
+
+        showStartHint?.();
     }
 
     // ----------------------------
