@@ -14,44 +14,6 @@
 
 </head>
 
-<!-- PDF Download Modal -->
-<div id="pdfModal" class="pdf-modal" aria-hidden="true">
-  <div class="pdf-modal__backdrop" data-pdf-close></div>
-
-  <div class="pdf-modal__panel" role="dialog" aria-modal="true" aria-labelledby="pdfModalTitle">
-    <div class="pdf-modal__header">
-      <div>
-        <div id="pdfModalTitle" class="pdf-modal__title">Download a PDF copy</div>
-        <div class="pdf-modal__subtitle">Pick the size that fits.</div>
-      </div>
-      <button class="pdf-modal__x" type="button" aria-label="Close" data-pdf-close>✕</button>
-    </div>
-
-    <div class="pdf-modal__body">
-      <button id="pdfMamaBtn" class="pdf-option" type="button">
-        <div class="pdf-option__top">
-          <div class="pdf-option__name">🐻 Mama Bear — Screen-Optimized <span class="pdf-pill">Recommended</span></div>
-          <div class="pdf-option__size" id="pdfMamaSize">~140 MB</div>
-        </div>
-        <div class="pdf-option__desc">Best for reading, sharing, and printing selected pages.</div>
-      </button>
-
-      <button id="pdfPapaBtn" class="pdf-option pdf-option--big" type="button">
-        <div class="pdf-option__top">
-          <div class="pdf-option__name">🐻‍❄️ Papa Bear — Full-Resolution <span
-              class="pdf-pill pdf-pill--big">Archival</span></div>
-          <div class="pdf-option__size" id="pdfPapaSize">~900 MB</div>
-        </div>
-        <div class="pdf-option__desc">Maximum image quality. Very large download.</div>
-      </button>
-
-      <div class="pdf-modal__hint">
-        Tip: downloads are happiest on Wi-Fi / desktop.
-      </div>
-    </div>
-  </div>
-</div>
-
 <body>
   <div id="flipbook-container">
     <div id="flipbook-stage">
@@ -125,13 +87,50 @@
       <div id="moreMenu" class="moremenu">
         <button id="btnShare" type="button"><img data-ikey="share" alt="" />Share</button>
         <button id="btnStage" type="button"><img data-ikey="pan" alt="" />Stage</button>
-        <button id="btnPrint" type="button"><img data-ikey="print" alt="" />Print</button>
+        <button id="btnDownload" type="button"><img data-ikey="download" alt="" />Download</button>
         <button id="btnFull" type="button"><img data-ikey="fullscreen" alt="" />Full Screen</button>
         <button id="btnSearch" type="button"><img data-ikey="search" alt="" />Search</button>
         <div id="stageMenu" class="stagemenu"></div>
       </div>
     </div>
   </div>
-</body>
+  <!-- PDF Download Modal -->
+  <div id="pdfModal" class="pdf-modal" aria-hidden="true">
+    <div class="pdf-modal__backdrop" data-pdf-close></div>
 
+    <div class="pdf-modal__panel" role="dialog" aria-modal="true" aria-labelledby="pdfModalTitle">
+      <div class="pdf-modal__header">
+        <div>
+          <div id="pdfModalTitle" class="pdf-modal__title">Download a PDF copy</div>
+          <div class="pdf-modal__subtitle">Pick the size that fits.</div>
+        </div>
+        <button class="pdf-modal__x" type="button" aria-label="Close" data-pdf-close>✕</button>
+      </div>
+
+      <div class="pdf-modal__body">
+        <button id="pdfMamaBtn" class="pdf-option" type="button">
+          <div class="pdf-option__top">
+            <div class="pdf-option__name">🐻 Mama Bear — Screen-Optimized <span class="pdf-pill">Recommended</span>
+            </div>
+            <div class="pdf-option__size" id="pdfMamaSize">~140 MB</div>
+          </div>
+          <div class="pdf-option__desc">Best for reading, sharing, and printing selected pages.</div>
+        </button>
+
+        <button id="pdfPapaBtn" class="pdf-option pdf-option--big" type="button">
+          <div class="pdf-option__top">
+            <div class="pdf-option__name">🐻‍❄️ Papa Bear — Full-Resolution <span
+                class="pdf-pill pdf-pill--big">Archival</span></div>
+            <div class="pdf-option__size" id="pdfPapaSize">~900 MB</div>
+          </div>
+          <div class="pdf-option__desc">Maximum image quality. Very large download.</div>
+        </button>
+
+        <div class="pdf-modal__hint">
+          Tip: downloads are happiest on Wi-Fi / desktop.
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
 </html>

@@ -763,7 +763,7 @@ console.log("✅ main script started");
 
         // Share/Print/Full/Search/Sound
         els.btnShare && (els.btnShare.onclick = doShare);
-        els.btnPrint && (els.btnPrint.onclick = openPdfModal);
+        els.btnDownload && (els.btnDownload.onclick = openPdfModal);
 
         els.btnFull &&
             (els.btnFull.onclick = () => {
@@ -830,7 +830,7 @@ console.log("✅ main script started");
             "btnTiles",
             "btnMore",
             "btnShare",
-            "btnPrint",
+            "btnDownload",
             "btnFull",
             "btnSearch",
             "btnSound",
