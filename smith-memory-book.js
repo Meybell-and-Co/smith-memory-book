@@ -98,6 +98,10 @@ console.log("✅ main script started");
     let zoom = Number(localStorage.getItem("flip:zoom") || String(DEFAULT_ZOOM));
     let stageKey = localStorage.getItem("flip:stage") || DEFAULT_STAGE_KEY;
 
+    // PDF modal focus return (runtime state)
+    let lastPdfOpenerEl = null;
+
+
     let panX = 0,
         panY = 0;
     let isPanning = false,
@@ -871,79 +875,100 @@ console.log("✅ main script started");
     wireUIOnce();
     bootRestingState();
 
-// ----------------------------
-// PDF Download (Mama/Papa)
-// ----------------------------
-const PDFS = {
-  mama: {
-    url: "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/guest-user-copies/Dear-Little-Home-Hi-Res.pdf",
-    label: "~140 MB",
-  },
-  papa: {
-    url: "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/guest-user-copies/Dear-Little-Home-Hi-Res.pdf",
-    label: "~900 MB",
-    confirmText:
-      "This is a very large file (~900 MB).\n\nBest on desktop + fast Wi-Fi.\n\nDownload anyway?",
-  },
-};
+    // ----------------------------
+    // PDF Download (Mama/Papa)
+    // ----------------------------
+    const PDFS = {
+        mama: {
+            url: "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/guest-user-copies/Dear-Little-Home-Med-Res.pdf",
+            label: "~140 MB",
+        },
+        papa: {
+            url: "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/guest-user-copies/Dear-Little-Home-Hi-Res.pdf",
+            label: "~900 MB",
+            confirmText:
+                "This is a very large file (~900 MB).\n\nBest on desktop + fast Wi-Fi.\n\nDownload anyway?",
+        },
+    };
 
-function openPdfModal() {
-  const modal = document.getElementById("pdfModal");
-  if (!modal) return;
-  modal.classList.add("is-open");
-  modal.setAttribute("aria-hidden", "false");
-  document.documentElement.style.overflow = "hidden";
+    function openPdfModal() {
+        const modal = document.getElementById("pdfModal");
+        if (!modal) return;
+
+        // Remember what had focus (usually the Download button)
+        lastPdfOpenerEl = document.activeElement;
+
+        modal.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+        modal.removeAttribute("inert"); // wake it up
+        document.documentElement.style.overflow = "hidden";
+
+        // Optional but nice: focus the recommended option
+        const mama = document.getElementById("pdfMamaBtn");
+        mama && mama.focus();
+    }
+
+    function closePdfModal() {
+        const modal = document.getElementById("pdfModal");
+        if (!modal) return;
+
+        // 🔑 1. Move focus OUT first
+        if (lastPdfOpenerEl && typeof lastPdfOpenerEl.focus === "function") {
+            lastPdfOpenerEl.focus();
+        } else if (document.body && typeof document.body.focus === "function") {
+            document.body.focus();
+        }
+
+        // 🔑 2. THEN hide + deactivate
+        modal.classList.remove("is-open");
+        modal.setAttribute("aria-hidden", "true");
+        modal.setAttribute("inert", ""); // put it to sleep
+        document.documentElement.style.overflow = "";
+    }
 }
 
-function closePdfModal() {
-  const modal = document.getElementById("pdfModal");
-  if (!modal) return;
-  modal.classList.remove("is-open");
-  modal.setAttribute("aria-hidden", "true");
-  document.documentElement.style.overflow = "";
-}
-
-function triggerDownload(url) {
-  // reliable across browsers; your host controls whether it downloads vs previews
-  window.open(url, "_blank", "noopener,noreferrer");
+    function triggerDownload(url) {
+    // reliable across browsers; your host controls whether it downloads vs previews
+    window.open(url, "_blank", "noopener,noreferrer");
 }
 
 function bindPdfModalOnce() {
-  const modal = document.getElementById("pdfModal");
-  const mamaBtn = document.getElementById("pdfMamaBtn");
-  const papaBtn = document.getElementById("pdfPapaBtn");
-  const mamaSize = document.getElementById("pdfMamaSize");
-  const papaSize = document.getElementById("pdfPapaSize");
+    const modal = document.getElementById("pdfModal");
+    const mamaBtn = document.getElementById("pdfMamaBtn");
+    const papaBtn = document.getElementById("pdfPapaBtn");
+    const mamaSize = document.getElementById("pdfMamaSize");
+    const papaSize = document.getElementById("pdfPapaSize");
 
-  if (!modal || !mamaBtn || !papaBtn) return;
 
-  if (mamaSize) mamaSize.textContent = PDFS.mama.label;
-  if (papaSize) papaSize.textContent = PDFS.papa.label;
+    if (!modal || !mamaBtn || !papaBtn) return;
 
-  // Close on backdrop / X
-  modal.addEventListener("click", (e) => {
-    if (e.target && e.target.hasAttribute("data-pdf-close")) closePdfModal();
-  });
+    if (mamaSize) mamaSize.textContent = PDFS.mama.label;
+    if (papaSize) papaSize.textContent = PDFS.papa.label;
 
-  // Close on Esc
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && modal.classList.contains("is-open")) closePdfModal();
-  });
+    // Close on backdrop / X
+    modal.addEventListener("click", (e) => {
+        if (e.target && e.target.hasAttribute("data-pdf-close")) closePdfModal();
+    });
 
-  // Buttons
-  mamaBtn.addEventListener("click", () => {
-    closePdfModal();
-    triggerDownload(PDFS.mama.url);
-  });
+    // Close on Esc
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && modal.classList.contains("is-open")) closePdfModal();
+    });
 
-  papaBtn.addEventListener("click", () => {
-    if (!window.confirm(PDFS.papa.confirmText)) return;
-    closePdfModal();
-    triggerDownload(PDFS.papa.url);
-  });
+    // Buttons
+    mamaBtn.addEventListener("click", () => {
+        closePdfModal();
+        triggerDownload(PDFS.mama.url);
+    });
+
+    papaBtn.addEventListener("click", () => {
+        if (!window.confirm(PDFS.papa.confirmText)) return;
+        closePdfModal();
+        triggerDownload(PDFS.papa.url);
+    });
 }
 
 // Call once after DOM exists
 bindPdfModalOnce();
 
-})();
+}) ();
