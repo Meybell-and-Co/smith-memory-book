@@ -957,12 +957,17 @@ function bindPdfModalOnce() {
 
     // Buttons
     mamaBtn.addEventListener("click", () => {
+        console.log("MAMA URL:", PDFS?.mama?.url);
         closePdfModal();
         triggerDownload(PDFS.mama.url);
     });
 
     papaBtn.addEventListener("click", () => {
-        if (!window.confirm(PDFS.papa.confirmText)) return;
+        console.log("PAPA URL:", PDFS?.papa?.url);
+
+        const ok = window.confirm(PDFS.papa.confirmText);
+        if (!ok) return;
+
         closePdfModal();
         triggerDownload(PDFS.papa.url);
     });
@@ -970,5 +975,3 @@ function bindPdfModalOnce() {
 
 // Call once after DOM exists
 bindPdfModalOnce();
-
-}) ();
