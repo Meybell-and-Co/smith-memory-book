@@ -134,7 +134,6 @@ console.log("✅ main script started");
         a.preload = "auto";
         a.volume = vol;
         return a;
-    }
 
     const SFX = {
         hover: makeAudio(SOUND_BASE + "hover.mp3", 0.35),
@@ -195,6 +194,40 @@ console.log("✅ main script started");
         pages.push(null); // ghost
         pages.push(pageUrl(TOTAL_PAGES)); // back cover
         return pages;
+    }
+
+    function hydrateEls() {
+        els = {
+            stage: $("flipbook-stage"),
+            wrap: $("flipbook-wrap"),
+            book: $("flipbook"),
+            flipbar: $("flipbar"),
+            startBtn: $("startBtn"),
+            startScreen: $("startScreen"),
+            startHint: $("startHint"),
+
+            btnFirst: $("btnFirst"),
+            btnPrev: $("btnPrev"),
+            btnNext: $("btnNext"),
+            btnLast: $("btnLast"),
+
+            pageJump: $("pageJump"),
+            zoomIn: $("zoomIn"),
+            zoomOut: $("zoomOut"),
+            zoomReset: $("zoomReset"),
+            btnTiles: $("btnTiles"),
+            tiles: $("tiles"),
+            tilesGrid: $("tilesGrid"),
+            tilesClose: $("tilesClose"),
+            btnMore: $("btnMore"),
+            moreMenu: $("moreMenu"),
+            btnShare: $("btnShare"),
+            btnDownload: $("btnDownload"),
+            btnFull: $("btnFull"),
+            btnSound: $("btnSound"),
+            btnStage: $("btnStage"),
+            stageSubmenu: $("stageSubmenu"),
+        };
     }
 
     // ----------------------------
@@ -657,7 +690,7 @@ console.log("✅ main script started");
             stage: !!els.stage,
             body: document.body.className
         });
-        
+
         applyStage();
         paintIcons();
         applyTransform();
@@ -879,193 +912,182 @@ Requires page → content mapping (JSON).
       </button>`
             ).join("");
 
-            function renderStageSubmenu() {
-                if (!els.stageSubmenu) return;
-
-                els.stageSubmenu.innerHTML = STAGES.map(
-                    ([key, label, emoji]) => `
-      <button type="button" class="stage-item" data-stage="${key}">
-        <span class="label">${label}</span>
-        <span class="emoji">${emoji}</span>
-      </button>
-    `
-                ).join("");
-
-                // ✅ ensure ▣ / ■ reflect current stage on open
-                setStageSelected(stageKey);
-            }
-
-        }
-
-        if (els.btnStage && els.stageSubmenu) {
-            renderStageSubmenu();
-            updateStageIcon(false); // closed by default
-
-            els.btnStage.onclick = () => {
-                playSfx("click");
-                const willOpen = els.stageSubmenu.hidden;   // if hidden now, we are about to open
-                els.stageSubmenu.hidden = !els.stageSubmenu.hidden;
-                updateStageIcon(willOpen);                  // open => stageactive, closed => stagebefore
-                els.btnStage.setAttribute("aria-expanded", String(willOpen));
-            };
-        }
-
-        els.stageSubmenu?.addEventListener("click", (e) => {
-            const btn = e.target.closest("button[data-stage]");
-            if (!btn) return;
-
-            stageKey = btn.dataset.stage;
-            localStorage.setItem("flip:stage", stageKey);
-
-            applyStage();
-
-            // NEW: update the ▣/■ indicators
+            // Ensure ▣ / ■ reflect current stage immediately
             setStageSelected(stageKey);
-
-            // Optional: close after selecting (feels nicer)
-            els.stageSubmenu.hidden = true;
-            updateStageIcon(false);
-            els.btnStage.setAttribute("aria-expanded", "false");
-        });
-
-
-        // Button SFX (only for real buttons)
-        function wireButtonSfx(...ids) {
-            ids.forEach((id) => {
-                const el = $(id);
-                if (!el) return;
-                el.addEventListener("pointerenter", () => playSfx("hover"));
-                el.addEventListener("click", () => playSfx("click"));
-            });
         }
 
-        wireButtonSfx(
-            "btnFirst",
-            "btnPrev",
-            "btnNext",
-            "btnLast",
-            "zoomOut",
-            "zoomIn",
-            // disabling tiles for MVP shipment deadline //
-            // "btnTiles",
-            "btnMore",
-            "btnShare",
-            "btnDownload",
-            "btnFull",
-            // MVP Note: we're not doing JSON mapping for an MVP product. //
-            // "btnSearch",
-            "btnSound",
-            "btnStage"
-        );
-
-        // ----------------------------
-        // Boot: ensure true resting state
-        // ----------------------------
-
-        // ----------------------------
-        // PDF Download (Mama/Papa)
-        // ----------------------------
-        const PDFS = {
-            mama: {
-                url: "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/guest-user-copies/Dear-Little-Home-Med-Res.pdf",
-                label: "~140 MB",
-            },
-            papa: {
-                url: "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/guest-user-copies/Dear-Little-Home-Hi-Res.pdf",
-                label: "~900 MB",
-                confirmText:
-                    "This is a very large file (~900 MB).\n\nBest on desktop + fast Wi-Fi.\n\nDownload anyway?",
-            },
-        };
-
-        function openPdfModal() {
-            const modal = document.getElementById("pdfModal");
-            if (!modal) return;
-
-            // Remember what had focus (usually the Download button)
-            lastPdfOpenerEl = document.activeElement;
-
-            modal.classList.add("is-open");
-            modal.setAttribute("aria-hidden", "false");
-            modal.removeAttribute("inert"); // wake it up
-            document.documentElement.style.overflow = "hidden";
-
-            // Optional but nice: focus the recommended option
-            const mama = document.getElementById("pdfMamaBtn");
-            mama && mama.focus();
-        }
-
-        function closePdfModal() {
-            const modal = document.getElementById("pdfModal");
-            if (!modal) return;
-
-            // 🔑 1. Move focus OUT first
-            if (lastPdfOpenerEl && typeof lastPdfOpenerEl.focus === "function") {
-                lastPdfOpenerEl.focus();
-            } else if (document.body && typeof document.body.focus === "function") {
-                document.body.focus();
-            }
-
-            // 🔑 2. THEN hide + deactivate
-            modal.classList.remove("is-open");
-            modal.setAttribute("aria-hidden", "true");
-            modal.setAttribute("inert", ""); // put it to sleep
-            document.documentElement.style.overflow = "";
-
-            els.moreMenu?.classList.remove("is-open");
-
-        }
-
-        function triggerDownload(url) {
-            // reliable across browsers; your host controls whether it downloads vs previews
-            window.open(url, "_blank", "noopener,noreferrer");
-        }
-
-        function bindPdfModalOnce() {
-            const modal = document.getElementById("pdfModal");
-            const mamaBtn = document.getElementById("pdfMamaBtn");
-            const papaBtn = document.getElementById("pdfPapaBtn");
-            const mamaSize = document.getElementById("pdfMamaSize");
-            const papaSize = document.getElementById("pdfPapaSize");
-
-
-            if (!modal || !mamaBtn || !papaBtn) return;
-
-            if (mamaSize) mamaSize.textContent = PDFS.mama.label;
-            if (papaSize) papaSize.textContent = PDFS.papa.label;
-
-            // Close on backdrop / X
-            modal.addEventListener("click", (e) => {
-                if (e.target && e.target.hasAttribute("data-pdf-close")) closePdfModal();
-            });
-
-            // Close on Esc
-            document.addEventListener("keydown", (e) => {
-                if (e.key === "Escape" && modal.classList.contains("is-open")) closePdfModal();
-            });
-
-            // Buttons
-            mamaBtn.addEventListener("click", () => {
-                console.log("MAMA URL:", PDFS?.mama?.url);
-                closePdfModal();
-                triggerDownload(PDFS.mama.url);
-            });
-
-            papaBtn.addEventListener("click", () => {
-                console.log("PAPA URL:", PDFS?.papa?.url);
-
-                const ok = window.confirm(PDFS.papa.confirmText);
-                if (!ok) return;
-
-                closePdfModal();
-                triggerDownload(PDFS.papa.url);
-            });
-        }
-
-        // Call once after DOM exists
-        bindPdfModalOnce();
 
     }
+
+    if (els.btnStage && els.stageSubmenu) {
+        renderStageSubmenu();
+        updateStageIcon(false); // closed by default
+
+        els.btnStage.onclick = () => {
+            playSfx("click");
+            const willOpen = els.stageSubmenu.hidden;   // if hidden now, we are about to open
+            els.stageSubmenu.hidden = !els.stageSubmenu.hidden;
+            updateStageIcon(willOpen);                  // open => stageactive, closed => stagebefore
+            els.btnStage.setAttribute("aria-expanded", String(willOpen));
+        };
+    }
+
+    els.stageSubmenu?.addEventListener("click", (e) => {
+        const btn = e.target.closest("button[data-stage]");
+        if (!btn) return;
+
+        stageKey = btn.dataset.stage;
+        localStorage.setItem("flip:stage", stageKey);
+
+        applyStage();
+
+        // NEW: update the ▣/■ indicators
+        setStageSelected(stageKey);
+
+        // Optional: close after selecting (feels nicer)
+        els.stageSubmenu.hidden = true;
+        updateStageIcon(false);
+        els.btnStage.setAttribute("aria-expanded", "false");
+    });
+
+
+    // Button SFX (only for real buttons)
+    function wireButtonSfx(...ids) {
+        ids.forEach((id) => {
+            const el = $(id);
+            if (!el) return;
+            el.addEventListener("pointerenter", () => playSfx("hover"));
+            el.addEventListener("click", () => playSfx("click"));
+        });
+    }
+
+    wireButtonSfx(
+        "btnFirst",
+        "btnPrev",
+        "btnNext",
+        "btnLast",
+        "zoomOut",
+        "zoomIn",
+        // disabling tiles for MVP shipment deadline //
+        // "btnTiles",
+        "btnMore",
+        "btnShare",
+        "btnDownload",
+        "btnFull",
+        // MVP Note: we're not doing JSON mapping for an MVP product. //
+        // "btnSearch",
+        "btnSound",
+        "btnStage"
+    );
+
+    // ----------------------------
+    // Boot: ensure true resting state
+    // ----------------------------
+
+    // ----------------------------
+    // PDF Download (Mama/Papa)
+    // ----------------------------
+    const PDFS = {
+        mama: {
+            url: "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/guest-user-copies/Dear-Little-Home-Med-Res.pdf",
+            label: "~140 MB",
+        },
+        papa: {
+            url: "https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/guest-user-copies/Dear-Little-Home-Hi-Res.pdf",
+            label: "~900 MB",
+            confirmText:
+                "This is a very large file (~900 MB).\n\nBest on desktop + fast Wi-Fi.\n\nDownload anyway?",
+        },
+    };
+
+    function openPdfModal() {
+        const modal = document.getElementById("pdfModal");
+        if (!modal) return;
+
+        // Remember what had focus (usually the Download button)
+        lastPdfOpenerEl = document.activeElement;
+
+        modal.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+        modal.removeAttribute("inert"); // wake it up
+        document.documentElement.style.overflow = "hidden";
+
+        // Optional but nice: focus the recommended option
+        const mama = document.getElementById("pdfMamaBtn");
+        mama && mama.focus();
+    }
+
+    function closePdfModal() {
+        const modal = document.getElementById("pdfModal");
+        if (!modal) return;
+
+        // 🔑 1. Move focus OUT first
+        if (lastPdfOpenerEl && typeof lastPdfOpenerEl.focus === "function") {
+            lastPdfOpenerEl.focus();
+        } else if (document.body && typeof document.body.focus === "function") {
+            document.body.focus();
+        }
+
+        // 🔑 2. THEN hide + deactivate
+        modal.classList.remove("is-open");
+        modal.setAttribute("aria-hidden", "true");
+        modal.setAttribute("inert", ""); // put it to sleep
+        document.documentElement.style.overflow = "";
+
+        els.moreMenu?.classList.remove("is-open");
+
+    }
+
+    function triggerDownload(url) {
+        // reliable across browsers; your host controls whether it downloads vs previews
+        window.open(url, "_blank", "noopener,noreferrer");
+    }
+
+    function bindPdfModalOnce() {
+        const modal = document.getElementById("pdfModal");
+        const mamaBtn = document.getElementById("pdfMamaBtn");
+        const papaBtn = document.getElementById("pdfPapaBtn");
+        const mamaSize = document.getElementById("pdfMamaSize");
+        const papaSize = document.getElementById("pdfPapaSize");
+
+
+        if (!modal || !mamaBtn || !papaBtn) return;
+
+        if (mamaSize) mamaSize.textContent = PDFS.mama.label;
+        if (papaSize) papaSize.textContent = PDFS.papa.label;
+
+        // Close on backdrop / X
+        modal.addEventListener("click", (e) => {
+            if (e.target && e.target.hasAttribute("data-pdf-close")) closePdfModal();
+        });
+
+        // Close on Esc
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && modal.classList.contains("is-open")) closePdfModal();
+        });
+
+        // Buttons
+        mamaBtn.addEventListener("click", () => {
+            console.log("MAMA URL:", PDFS?.mama?.url);
+            closePdfModal();
+            triggerDownload(PDFS.mama.url);
+        });
+
+        papaBtn.addEventListener("click", () => {
+            console.log("PAPA URL:", PDFS?.papa?.url);
+
+            const ok = window.confirm(PDFS.papa.confirmText);
+            if (!ok) return;
+
+            closePdfModal();
+            triggerDownload(PDFS.papa.url);
+        });
+    }
+
+    // Call once after DOM exists
+    bindPdfModalOnce();
+
+}
 
     // ----------------------------
     // Initial boot (ONCE)
@@ -1073,9 +1095,9 @@ Requires page → content mapping (JSON).
 
     // --- Boot once, after DOM is ready ---
     document.addEventListener("DOMContentLoaded", () => {
-        console.log("✅ DOM ready → booting resting state");
-        wireUIOnce();
-        bootRestingState();
-    });
-
-}());
+    hydrateEls();
+    console.log("✅ DOM ready → booting resting state");
+    wireUIOnce();
+    bootRestingState();
+});
+})
