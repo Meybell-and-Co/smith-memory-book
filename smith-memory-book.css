@@ -266,6 +266,10 @@ body.is-cover-only #flipbook-wrap::before {
   /* kill book frame */
 }
 
+.canary-test {
+  color: red;
+}
+
 .stf__item.--left {
   border-right: 0;
   box-shadow: inset -7px 0 30px -7px rgba(0, 0, 0, 0.35);
