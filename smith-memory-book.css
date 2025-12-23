@@ -266,10 +266,6 @@ body.is-cover-only #flipbook-wrap::before {
   /* kill book frame */
 }
 
-.canary-test {
-  color: red;
-}
-
 .stf__item.--left {
   border-right: 0;
   box-shadow: inset -7px 0 30px -7px rgba(0, 0, 0, 0.35);
@@ -850,4 +846,12 @@ body:not(.is-end-state) #flipbook-stage.is-resting #startHint {
   margin-top: 2px;
   font-size: 12px;
   color: rgba(255, 255, 255, 0.65);
+}
+
+body.is-reading .stf__item.--hard.--left {
+  box-shadow: inset -9px 0 36px -9px rgba(0,0,0,.32);
+}
+
+body.is-reading .stf__item.--hard.--right {
+  box-shadow: inset 9px 0 36px -9px rgba(0,0,0,.32);
 }
