@@ -4,6 +4,7 @@
   --ui-font: "Montserrat", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   --charcoal: #2E2E2E;
   --gold: #CBA135;
+}
 
   html,
   body {
@@ -18,16 +19,15 @@
     inset: 0;
   }
 
+:root {
   --stage-table: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/highlights/tabletop.webp");
   --stage-parquet: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/highlights/parquet.webp");
   --stage-kitchen: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/highlights/marble-kitchen.webp");
   --stage-basement: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/highlights/ginnys-basement-carpet.webp");
   --stage-lawn: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/highlights/lawn.webp");
   --stage-cancun: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/highlights/cancun-waters.webp");
-
   --book-frame: url("https://pub-be03f9c6fce44f8cbc3ec20dcaa3b337.r2.dev/highlights/smith-book-frame.webp");
 }
-
 body,
 button,
 input {
@@ -267,7 +267,7 @@ body.is-cover-only #flipbook-wrap::before {
 
 .stf__item.--left {
   border-right: 0;
-  box-shadow: inset - 10px 0 30px - 7px rgba(0, 0, 0, 0.35);
+  box-shadow: inset - 7px 0 30px - 7px rgba(0, 0, 0, 0.35);
 }
 
 .stf__item.--right {
