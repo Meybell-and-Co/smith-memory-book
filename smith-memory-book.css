@@ -331,10 +331,6 @@ body.is-reading #startScreen {
   transform-origin: center center;
 }
 
-.stf__item {
-  position: relative;
-}
-
 /* Panning cursors */
 #flipbook-wrap.can-pan,
 #flipbook-wrap.can-pan * {
