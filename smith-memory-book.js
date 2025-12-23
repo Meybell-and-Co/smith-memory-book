@@ -99,15 +99,6 @@ console.log("✅ main script started");
         btnSound: $("btnSound"),
         btnStage: $("btnStage"),
         stageSubmenu: $("stageSubmenu"),
-.stf__item.--left {
-            border-right: 0;
-    box - shadow: inset - 7px 0 30px - 7px rgba(0, 0, 0, 0.35);
-}
-
-    .stf__item.--right {
-    border - left: 0;
-    box - shadow: inset 7px 0 30px - 7px rgba(0, 0, 0, 0.35);
-}
     };
 
 // ----------------------------
