@@ -266,12 +266,12 @@ body.is-cover-only #flipbook-wrap::before {
   /* kill book frame */
 }
 
-.stf__item.--left {
+.stf__item--left {
   border-right: 0;
   box-shadow: inset -7px 0 30px -7px rgba(255, 0, 0, 0.8);
 }
 
-.stf__item.--right {
+.stf__item--right {
   border-left: 0;
   box-shadow: inset 7px 0 30px -7px rgba(255, 0, 0, 0.8);
 }
