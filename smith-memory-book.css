@@ -268,12 +268,16 @@ body.is-cover-only #flipbook-wrap::before {
 
 body.is-reading .stf__item.--left .page-image,
 body.is-reading .stf__item--left .page-image {
-  box-shadow: inset -14px 0 26px -16px rgba(0,0,0,.55);
+  inset: -10px 0 18px -12px rgba(0, 0, 0, .35);
+  inset: -22px 0 40px -24px rgba(0, 0, 0, .18);
+  inset: -40px 0 70px -40px rgba(0, 0, 0, .08);
 }
 
 body.is-reading .stf__item.--right .page-image,
 body.is-reading .stf__item--right .page-image {
-  box-shadow: inset 14px 0 26px -16px rgba(0,0,0,.55);
+  inset: 10px 0 18px -12px rgba(0, 0, 0, .35);
+  inset: 22px 0 40px -24px rgba(0, 0, 0, .18);
+  inset: 40px 0 70px -40px rgba(0, 0, 0, .08);
 }
 
 /* ----------------------------
@@ -849,9 +853,9 @@ body:not(.is-end-state) #flipbook-stage.is-resting #startHint {
 }
 
 body.is-reading .stf__item.--hard.--left {
-  box-shadow: inset -9px 0 36px -9px rgba(0,0,0,.32);
+  box-shadow: inset -9px 0 36px -9px rgba(0, 0, 0, .32);
 }
 
 body.is-reading .stf__item.--hard.--right {
-  box-shadow: inset 9px 0 36px -9px rgba(0,0,0,.32);
+  box-shadow: inset 9px 0 36px -9px rgba(0, 0, 0, .32);
 }
