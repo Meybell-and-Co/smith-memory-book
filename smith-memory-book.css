@@ -848,10 +848,12 @@ body:not(.is-end-state) #flipbook-stage.is-resting #startHint {
   color: rgba(255, 255, 255, 0.65);
 }
 
-body.is-reading .stf__item.--hard.--left {
+body.is-reading .stf__item.--left .page-image,
+body.is-reading .stf__item--left .page-image {
   box-shadow: inset -9px 0 36px -9px rgba(0, 0, 0, .32);
 }
 
-body.is-reading .stf__item.--hard.--right {
+body.is-reading .stf__item.--right .page-image,
+body.is-reading .stf__item--right .page-image {
   box-shadow: inset 9px 0 36px -9px rgba(0, 0, 0, .32);
 }
