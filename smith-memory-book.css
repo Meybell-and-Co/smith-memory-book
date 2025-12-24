@@ -266,14 +266,14 @@ body.is-cover-only #flipbook-wrap::before {
   /* kill book frame */
 }
 
-.stf__item--left {
-  border-right: 0;
-  box-shadow: inset -7px 0 30px -7px rgba(255, 0, 0, 0.8);
+body.is-reading .stf__item.--left .page-image,
+body.is-reading .stf__item--left .page-image {
+  box-shadow: inset -14px 0 26px -16px rgba(0,0,0,.55);
 }
 
-.stf__item--right {
-  border-left: 0;
-  box-shadow: inset 7px 0 30px -7px rgba(255, 0, 0, 0.8);
+body.is-reading .stf__item.--right .page-image,
+body.is-reading .stf__item--right .page-image {
+  box-shadow: inset 14px 0 26px -16px rgba(0,0,0,.55);
 }
 
 /* ----------------------------
