@@ -268,16 +268,12 @@ body.is-cover-only #flipbook-wrap::before {
 
 body.is-reading .stf__item.--left .page-image,
 body.is-reading .stf__item--left .page-image {
-  inset: -10px 0 18px -12px rgba(0, 0, 0, .35);
-  inset: -22px 0 40px -24px rgba(0, 0, 0, .18);
-  inset: -40px 0 70px -40px rgba(0, 0, 0, .08);
+  inset: -18px 0 34px -18px rgba(0, 0, 0, .5);
 }
 
 body.is-reading .stf__item.--right .page-image,
 body.is-reading .stf__item--right .page-image {
-  inset: 10px 0 18px -12px rgba(0, 0, 0, .35);
-  inset: 22px 0 40px -24px rgba(0, 0, 0, .18);
-  inset: 40px 0 70px -40px rgba(0, 0, 0, .08);
+  inset: 18px 0 34px -18px rgba(0, 0, 0, .5);
 }
 
 /* ----------------------------
