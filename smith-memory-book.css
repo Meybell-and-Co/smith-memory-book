@@ -22,7 +22,7 @@ html, body{
 
 body{
   margin: 0;
-  padding: 0;
+  overflow: hidden;
   font-family: var(--ui-font);
 }
 
@@ -30,19 +30,14 @@ button, input{
   font-family: var(--ui-font);
 }
 
-/* Stage: centered, fills viewport height with no outer margins */
 #flipbook-stage{
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-  box-sizing: border-box;
+  width: 100%;
+  min-height: 100dvh;
   padding: 120px;
-  margin: 0;
+  box-sizing: border-box;
   background: var(--stage-img, var(--stage-table)) center / cover no-repeat;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+  display: grid;
+  place-items: center;
 }
 
 #flipbook-stage .stf__parent,
