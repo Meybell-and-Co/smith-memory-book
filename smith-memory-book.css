@@ -68,7 +68,6 @@ canvas {
   width: 100% !important;
 }
 
-/* Decorative book frame overlay...
 #flipbook-stage::before{
   content: "";
   position: absolute;
@@ -77,7 +76,6 @@ canvas {
   pointer-events: none;
   z-index: 1;
 }
-...overlay */
 
 #flipbook-wrap{
   width: calc(100vw - 240px);
