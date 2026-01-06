@@ -111,6 +111,9 @@ canvas {
   transform-origin: center center;
 }
 
+#flipbook-wrap { outline: 2px solid lime; }
+#flipbook-stage::before { outline: 2px solid hotpink; }
+
 /* Flipbar controls */
 .flipbar{
   position: absolute;
