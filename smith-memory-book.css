@@ -81,8 +81,8 @@ canvas {
 }
 
 #flipbook-wrap{
-  width: calc(100vw - 240px);
-  height: calc(100vh - 240px); /* <-- IMPORTANT */
+  width: calc(100dvw - 240px);
+  height: calc(100dvh - 240px);
   min-height: 0;
 
   max-width: 100%;
